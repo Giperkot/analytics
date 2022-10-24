@@ -1,0 +1,9 @@
+.idea
+.idea/*
+node_modules
+node_modules/*
+package-lock.json
+*.iml
+analytics-dao/target/*
+analytics-web/target/*
+analytics-parser/target/*

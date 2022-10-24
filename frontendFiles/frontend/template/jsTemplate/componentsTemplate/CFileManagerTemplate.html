@@ -1,0 +1,28 @@
+<script id="CFileManagerTemplate" type="text/template">
+
+    <%
+    let disabled = (data.disabled) ? "disabled" : "";
+    data.type = data.type || "text";
+    %>
+    <div class="i_need form_wrapper__row">
+        <%if (data.labelText) {%>
+        <div class="form_wrapper__label">
+            <%=data.labelText%>
+        </div>
+        <%}%>
+        <div class="form_wrapper__input <%=data.theme%> <%=disabled%>">
+            <div class="flex_row">
+                <input class="standart_input" tabindex="1"
+                       value="<%=data.value%>" type="<%=data.type%>" placeholder="<%=data.placeholder%>"
+                <%=disabled%>
+                />
+                <!--<button class="choose_file"></button>-->
+                <div class="choose_file sent_button_wrapper sent_button_wrapper__hover <%=data.theme%>">
+                    <button name="ok" class="<%=data.elementClass%>" type="button"><%=data.buttonText%></button>
+                    <label class="sent_button_wrapper__alert"></label>
+                </div>
+            </div>
+            <label class="text-input-wrapper-alert hidden"></label>
+        </div>
+    </div>
+</script>

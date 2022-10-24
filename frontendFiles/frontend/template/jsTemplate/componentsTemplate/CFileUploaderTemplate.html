@@ -1,0 +1,48 @@
+<script id="CFileUploaderTemplate" type="text/template">
+
+    <?if (data.labelText) {?>
+        <div class="title_wrapper">
+            <label class="form_wrapper__label"><%=data.labelText%></label>
+        </div>
+    <?}?>
+
+    <form class="file_uploader_wrapper" method="post" action="/DragAndDropFileUploading/" enctype="multipart/form-data" novalidate="">
+        <div class="box__input">
+            <div class="box__icon upload_background">
+
+            </div>
+            <input type="file" name="files[]" class="box__file" data-multiple-caption="{count} files selected" multiple="">
+            <label>
+                <strong>Выберите файл</strong>
+                <span class="box__dragndrop"> или перенессите сюда</span>.
+            </label>
+        </div>
+<!--        <div class="getter_files_elm widest"></div>-->
+        <div class="uploaded_files_info">
+
+        </div>
+
+        <div class="box__uploading">Uploading…</div>
+        <div class="box__success">Done! <a href="" class="box__restart" role="button">Upload more?</a>
+        </div>
+        <div class="box__error">Error! <span/>. <a href="" class="box__restart" role="button">Try again!</a>
+        </div>
+    </form>
+</script>
+
+<script id="CFileUploaderFileItemTemplate" type="text/template">
+    <%for (var i = 0; i < data.fileArray.length; i++) {
+        let file = data.fileArray[i];
+    %>
+        <a href="#" class="fupload">
+                <span class="universal_file_type">
+                    <span>jpg</span>
+                </span>
+            <span class="fupload__name"><%=file.name%> (<%=file.size%> KB)</span>
+            <!--<div class="fupload__stat fupload__stat&#45;&#45;createOrder" data-hook-upload="progressContainer" style="opacity: 0;">
+                <div class="fupload__statInner" data-hook-upload="progress" style="width: 100%;"></div>
+            </div>-->
+            <span class="close_icon" data-hook-upload="remove" data-file=""></span>
+        </a>
+    <%}%>
+</script>

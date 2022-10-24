@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+<!--        <RollingFile name="file" filename="logs/app.log" filePattern="logs/app-%d{yyyy-MM-dd}-%i.log.gz">
+            <JsonLayout properties="true" includeStacktrace="true" objectMessageAsJsonObject="true"
+                        stacktraceAsString="true" eventEol="true" compact="true">
+                <KeyValuePair key="time" value="$${date:yyyy-MM-dd'T'HH:mm:ss.SSSZ}"/>
+            </JsonLayout>
+            &lt;!&ndash; <TimeBasedTriggeringPolicy /> &ndash;&gt;
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="24" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="1 GB"/>
+            </Policies>
+            <DefaultRolloverStrategy basePath="logs" compressionLevel="7">
+                <Delete basePath="logs" maxDepth="2">
+                    <IfFileName glob="app-*.log.gz"/>
+                    <IfLastModified age="20d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>-->
+
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d %p %c{1.} [%X{userName}] [%X{sessionId}] [%t] %m %ex%n"/>
+        </Console>
+
+    </Appenders>
+
+
+    <Loggers>
+        <Root level="DEBUG">
+<!--            <AppenderRef ref="file" level="INFO"/>-->
+            <AppenderRef ref="STDOUT" level="DEBUG"/>
+        </Root>
+    </Loggers>
+
+    <!--    <category name="class ru.orgunit.service.impl.sd.TicketServiceImpl">
+            <priority value="DEBUG"/>
+            <appender-ref ref="tickets_log"/>
+        </category>-->
+
+</Configuration>

@@ -1,0 +1,56 @@
+<script id="CTableSelectorTemplate" type="text/template">
+
+    <div class="form_wrapper__label"><%=data.labelText%></div>
+    <div class="flex_row">
+        <%if (data.controls.add) {%>
+        <a href="" data-link="" data-action="add" class="ctrl_btn icon_line_wrapper">
+            <span class="standart__icon table_add_background" title="Добавить"></span>
+            <span class="link_style create_new_test"></span>
+        </a>
+        <%}%>
+        <%if (data.controls.edit) {%>
+        <a href="" data-link="" data-action="edit" class="ctrl_btn icon_line_wrapper disabled">
+            <span class="standart__icon table_edit_background" title="Редактировать"></span>
+            <span class="link_style create_new_test"></span>
+        </a>
+        <%}%>
+        <%if (data.controls.delete) {%>
+        <a href="" data-link="" data-action="delete" class="ctrl_btn icon_line_wrapper disabled">
+            <span class="standart__icon table_remove_background" title="Удалить"></span>
+            <span class="link_style create_new_test"></span>
+        </a>
+        <%}%>
+    </div>
+
+    <table>
+        <tr class="header_row">
+            <%for (let i = 0; i < data.columns.length; i++) {%>
+                <th  class="<%=(data.columns[i].className) ? data.columns[i].className : ''%>">
+                    <%=data.columns[i].label%>
+                </th>
+            <%}%>
+        </tr>
+
+        <%for (let j = 0; j < data.gridData.length; j++) {
+            let row = data.gridData[j];
+        %>
+            <tr data-id="<%=data.gridData[j][data.idField]%>" <%=(row.className) ? 'class="' + row.className + '"' : ''%>>
+                <%for (let i = 0; i < data.columns.length; i++) {%>
+                <td>
+                    <%if (data.columns[i].name === "ord") {
+                        row.ord = j;
+                    %>
+                        <%=j + 1%>
+                    <%} else {%>
+                        <%=row[data.columns[i].name]%>
+                    <%}%>
+                </td>
+                <%}%>
+            </tr>
+        <%}%>
+    </table>
+
+    <%if (data.gridData.length == 0) {%>
+        <div>Данные отвутствуют</div>
+    <%}%>
+</script>

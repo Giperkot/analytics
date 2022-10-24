@@ -1,0 +1,7 @@
+<script id="CAnimatedTextFieldTemplate" type="text/template">
+    <div class="text-input-wrapper <%=data.theme%><%=(data.disabled) ? ' text-input-wrapper__disabled' : ''%>">
+        <label><%=data.labelText%></label>
+        <input type="<%=data.type%>" name="<%=data.name%>" value="<%=data.value%>" autocomplete="false" <%=(data.disabled) ? 'disabled' : ''%>"/>
+    </div>
+    <label class="text-input-wrapper-alert"></label>
+</script>

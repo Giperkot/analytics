@@ -1,0 +1,110 @@
+@livesSise: 30px;
+
+.stage_wrapper {
+  width: 100%;
+}
+
+.stage_left {
+  float: left;
+  width: 29%;
+  height: 100%;
+  display: inline-block;
+  padding: 30px 50px;
+  box-sizing: border-box;
+  position: relative;
+  top: 0;
+
+  .task_description__result {
+    text-align: center;
+    margin: 10px 0;
+    font-size: 15px;
+    font-weight: bold;
+  }
+
+  .green {
+    color: #60daaa;
+  }
+
+  .red {
+    color: #f20d0d;
+  }
+
+  .lives {
+    margin-top: 30px;
+    text-align: center;
+    .lives_live {
+      width: @livesSise;
+      height: @livesSise;
+      background: url('images/live.png') center no-repeat;
+      background-size: contain;
+      display: inline-block;
+    }
+  }
+
+  .task_description {
+    padding: 20px 0;
+    //font-size: 17px;
+  }
+
+  .task_description {
+    min-height: 50px;
+  }
+
+}
+
+
+.stage_right {
+  float: left;
+  width: 70%;
+  height: 100%;
+  display: inline-block;
+}
+
+
+//Progress
+
+/*.progress progress[value="50"] {
+  & + .progress-value:before { content : '50%' }
+  & ~ .progress-bg .progress-bar { width: 50% }
+}*/
+
+.equaer_view {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 50px;
+  box-sizing: border-box;
+  min-height: calc(100vh - 64px);
+
+  .main_equaer {
+    font-size: 30px;
+  }
+
+  .common_conteiner__top {
+    height: 60%;
+    flex-grow: 2;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+
+    iframe {
+      width: 100%;
+    }
+
+  }
+
+  .common_conteiner__button {
+    height: 40%;
+    min-width: 500px;
+    flex-grow: 1;
+  }
+
+/*  .row_button_container {
+    display: flex;
+    justify-content: center;
+  }*/
+
+}
+

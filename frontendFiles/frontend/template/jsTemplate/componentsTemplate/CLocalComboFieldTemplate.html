@@ -1,0 +1,54 @@
+<script id="CLocalComboFieldTemplate" type="text/template">
+    <div class="i_need form_wrapper__row">
+        <div class="form_wrapper__label">
+            <%=data.labelText%>
+        </div>
+        <div class="service_manager" tabindex="2">
+            <div class="form_wrapper__input">
+                <input class="standart_input"
+                       value="<%=data.displayValue%>"
+                       tabindex="1"
+                       placeholder="<%=data.placeholder%>" />
+                <div class="selected_container_button">
+                    <span class="selected_button"></span>
+                </div>
+                <div class="preloader_wait">
+                    <img class="ui_ico_loading" src="/style/images/special/loader.png" alt="">
+                </div>
+            </div>
+            <div class="selected_field">
+
+            </div>
+        </div>
+    </div>
+</script>
+
+<script id="CLocalComboFieldOptionListTemplate" type="text/template">
+    <%for (let i = 0; i < data.data.length; i++) {
+    let option = data.data[i];
+    %>
+    <div class="service_line" data-id="<%=option[data.idField]%>">
+        <div class="service_line__name"><%=option[data.valueField]%></div>
+        <div class="service_line__price"><% if (option.priceCustomer){ %> <%=option.priceCustomer%> <%=option.measurePrice%>. <%}%> </div>
+    </div>
+    <%}%>
+</script>
+
+<script id="CRemoteComboFieldOptionListTemplate" type="text/template">
+    <%for (let i = 0; i < data.data.length; i++) {
+    let option = data.data[i];
+    %>
+    <div class="service_line" data-id="<%=option[data.idField]%>">
+        <div class="service_line__name"><%=option[data.valueField]%></div>
+        <div class="service_line__price"><% if (option.priceCustomer){ %> <%=option.priceCustomer%> <%=option.measurePrice%>. <%}%> </div>
+    </div>
+    <%}%>
+
+    <%if (data.remote) {%>
+        <div class="service_line__pagination">
+            <div class="arrow_left<%=(data.remote.page === 1) ? ' disabled' : ''%> prev_page"></div>
+            <div class="page_info">Страница <%=data.remote.page%></div>
+            <div class="arrow_right<%=(data.remote.isEnd) ? ' disabled' : ''%> next_page"></div>
+        </div>
+    <%}%>
+</script>

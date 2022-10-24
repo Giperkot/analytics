@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+    <script>
+      function S(e) {
+        return Object.keys(e).map((t=>({
+          key: t,
+          value: (e[t] || "").toString()
+        }))).sort(((e,t)=>e.key < t.key ? -1 : e.key > t.key ? 1 : 0)).map((e=>e.value)).join("")
+      }
+      function T(e) {
+        return e.split("?")[0].replace(/^[^/]*\/\/[^/]+\//, "/")
+      }
+      const A = [22, 4147, 1234, 11]
+        , C = A[0] + A[3]
+        , w = A[1] + A[2];
+      function k(e, t, s) {
+        const r = S(t);
+        // return U(T(e) + r + s)
+        return U(e + r + s)
+      }
+      function U(e) {
+        const t = e.length;
+        let s = w;
+        console.log("start");
+        for (let r = 0; r < t; r += 1) {
+          s = s * C + e.charCodeAt(r);
+          s >>>= 0;
+          console.log(s);
+        }
+
+        return s
+      }
+
+      console.log(k("/3.0/items/byid", {
+        "id": "2252435468854539",
+        "key": "rurbbn3446",
+        "locale": "ru_RU",
+        "fields": "items.locale,items.flags,search_attributes,items.adm_div,items.city_alias,items.region_id,items.segment_id,items.reviews,items.point,request_type,context_rubrics,query_context,items.links,items.name_ex,items.org,items.group,items.dates,items.external_content,items.contact_groups,items.comment,items.ads.options,items.email_for_sending.allowed,items.stat,items.stop_factors,items.description,items.geometry.centroid,items.geometry.selection,items.geometry.style,items.timezone_offset,items.context,items.level_count,items.address,items.is_paid,items.access,items.access_comment,items.for_trucks,items.is_incentive,items.paving_type,items.capacity,items.schedule,items.floors,ad,items.rubrics,items.routes,items.platforms,items.directions,items.barrier,items.reply_rate,items.purpose,items.attribute_groups,items.route_logo,items.has_goods,items.has_apartments_info,items.has_pinned_goods,items.has_realty,items.has_exchange,items.has_payments,items.has_dynamic_congestion,items.is_promoted,items.congestion,items.delivery,items.order_with_cart,search_type,items.has_discount,items.metarubrics,broadcast,items.detailed_subtype,items.temporary_unavailable_atm_services,items.poi_category,items.structure_info.material,items.structure_info.floor_type,items.structure_info.gas_type,items.structure_info.year_of_construction,items.structure_info.elevators_count,items.structure_info.is_in_emergency_state,items.structure_info.project_type",
+        "viewpoint1": "55.70136996182143,58.170571763867045",
+        "viewpoint2": "56.77803003817857,57.83762823613296",
+        "stat[sid]": "4cf3d884-b693-48f6-8385-82fe209c86ba",
+        "stat[user]": "85eec556-7ea0-4ff6-a612-f46053fc682f",
+        "shv": "2022-09-26-12"
+      }, "baf4c54e9dae"));
+
+    </script>
+
+</body>
+</html>

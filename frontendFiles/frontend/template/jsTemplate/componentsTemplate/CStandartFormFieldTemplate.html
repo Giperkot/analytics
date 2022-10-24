@@ -1,0 +1,21 @@
+<script id="CStandartFormFieldTemplate" type="text/template">
+
+    <%
+    let disabled = (data.disabled) ? "disabled" : "";
+    data.type = data.type || "text";
+    %>
+    <div class="i_need form_wrapper__row">
+        <%if (data.labelText) {%>
+        <div class="form_wrapper__label">
+            <%=data.labelText%>
+        </div>
+        <%}%>
+        <div class="form_wrapper__input <%=data.theme%> <%=disabled%>">
+            <input class="standart_input" tabindex="1"
+                   value="<%=data.value%>" type="<%=data.type%>" placeholder="<%=data.placeholder%>"
+                   <%=disabled%>
+            />
+            <label class="input_wrapper_alert hidden"></label>
+        </div>
+    </div>
+</script>
