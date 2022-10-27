@@ -1,7 +1,6 @@
 package repository.twogis;
 
 import consts.ProjectConst;
-import dto.twogis.HouseResultDto;
 import dto.twogis.KeyValue;
 import dto.twogis.SearchHouseDto;
 import exceptions.YandexBadRequestException;
@@ -18,7 +17,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -158,7 +156,7 @@ public class TwoGisRepository extends AbstractParser {
         return response;
     }
 
-    public HouseResultDto getHouseInfoById(List<KeyValue> paramsList, Map<String, String> headerMap) throws URISyntaxException, IOException, InterruptedException {
+    public String getHouseInfoByIdUrl(List<KeyValue> paramsList) {
         String url = "https://catalog.api.2gis.ru/3.0/items/byid";
 
         int[] arr = {22, 4147, 1234, 11};
@@ -168,43 +166,58 @@ public class TwoGisRepository extends AbstractParser {
         String queryPart = getQueryString(paramsList, w, c, twoGisHash);
         url = url + queryPart;
 
-        HttpRequest.Builder builder = HttpRequest
-                .newBuilder(new URI(url))
-                .GET();
-
-        for (String key : headerMap.keySet()) {
-            builder.header(key, headerMap.get(key));
-        }
-
-        HttpResponse<byte[]> response = client.send(builder.build(), HttpResponse.BodyHandlers.ofByteArray());
-
-        if (response.statusCode() == 307) {
-            Map<String, String> headerRedirectedMap = new HashMap<>();
-            // headerRedirectedMap.put("Host", "ohio9.vchecks.io");
-            // headerRedirectedMap.put("Connection", "keep-alive");
-            headerRedirectedMap.put("Cache-Control", "max-age=0");
-            headerRedirectedMap.put("sec-ch-ua", "\"Google Chrome\";v=\"105\", \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"105\"");
-            headerRedirectedMap.put("sec-ch-ua-mobile", "?0");
-            headerRedirectedMap.put("sec-ch-ua-platform", "Windows");
-            headerRedirectedMap.put("Upgrade-Insecure-Requests", "1");
-            headerRedirectedMap.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36");
-            headerRedirectedMap.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
-            headerRedirectedMap.put("Sec-Fetch-Site", "none");
-            headerRedirectedMap.put("Sec-Fetch-Mode", "navigate");
-            headerRedirectedMap.put("Sec-Fetch-User", "?1");
-            headerRedirectedMap.put("Sec-Fetch-Dest", "document");
-            headerRedirectedMap.put("Accept-Encoding", "gzip, deflate, br");
-            headerRedirectedMap.put("Sccept-Language", "ru-RU,ru;q=0.9");
-
-            response = doGetRedirect(response.headers().firstValue("location").get(), url, headerRedirectedMap, 1);
-        }
-
-        if (response.statusCode() != 200) {
-            throw new YandexBadRequestException();
-        }
-
-        return ProjectConst.MAPPER.readValue(getBody(response.body(), "br"), HouseResultDto.class);
+        return url;
     }
+
+//    public HouseResultDto getHouseInfoById(List<KeyValue> paramsList, Map<String, String> headerMap) throws URISyntaxException, IOException, InterruptedException {
+//        String url = "https://catalog.api.2gis.ru/3.0/items/byid";
+//
+//        int[] arr = {22, 4147, 1234, 11};
+//        int c = arr[0] + arr[3], w = arr[1] + arr[2];
+//        String twoGisHash = "baf4c54e9dae";
+//
+//        String queryPart = getQueryString(paramsList, w, c, twoGisHash);
+//        url = url + queryPart;
+//
+//        HttpRequest.Builder builder = HttpRequest
+//                .newBuilder(new URI(url))
+//                .GET();
+//
+//        for (String key : headerMap.keySet()) {
+//            builder.header(key, headerMap.get(key));
+//        }
+//
+//        HttpResponse<byte[]> response = client.send(builder.build(), HttpResponse.BodyHandlers.ofByteArray());
+//
+//        if (response.statusCode() == 307) {
+//            Map<String, String> headerRedirectedMap = new HashMap<>();
+//            // headerRedirectedMap.put("Host", "ohio9.vchecks.io");
+//            // headerRedirectedMap.put("Connection", "keep-alive");
+//            headerRedirectedMap.put("Cache-Control", "max-age=0");
+//            headerRedirectedMap.put("sec-ch-ua", "\"Google Chrome\";v=\"105\", \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"105\"");
+//            headerRedirectedMap.put("sec-ch-ua-mobile", "?0");
+//            headerRedirectedMap.put("sec-ch-ua-platform", "Windows");
+//            headerRedirectedMap.put("Upgrade-Insecure-Requests", "1");
+//            headerRedirectedMap.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36");
+//            headerRedirectedMap.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+//            headerRedirectedMap.put("Sec-Fetch-Site", "none");
+//            headerRedirectedMap.put("Sec-Fetch-Mode", "navigate");
+//            headerRedirectedMap.put("Sec-Fetch-User", "?1");
+//            headerRedirectedMap.put("Sec-Fetch-Dest", "document");
+//            headerRedirectedMap.put("Accept-Encoding", "gzip, deflate, br");
+//            headerRedirectedMap.put("Sccept-Language", "ru-RU,ru;q=0.9");
+//
+//            response = doGetRedirect(response.headers().firstValue("location").get(), url, headerRedirectedMap, 1);
+//        }
+//
+//        if (response.statusCode() != 200) {
+//            throw new YandexBadRequestException();
+//        }
+//
+//        String contentEncoding = response.headers().firstValue("content-encoding").get();
+//
+//        return ProjectConst.MAPPER.readValue(getBody(response.body(), contentEncoding), HouseResultDto.class);
+//    }
 
     public String getMainPage(Map<String, String> headerMap) throws IOException, InterruptedException, URISyntaxException {
         String url = "https://2gis.ru/";

@@ -3,6 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <packaging>jar</packaging>
 
   <groupId>org.example</groupId>
   <artifactId>analytics-browser</artifactId>
@@ -12,5 +13,208 @@
     <maven.compiler.source>16</maven.compiler.source>
     <maven.compiler.target>16</maven.compiler.target>
   </properties>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>st-nexus-snapshots</id>
+      <url>https://nexus.stvolov.site/repository/maven-snapshots/</url>
+    </snapshotRepository>
+    <repository>
+      <id>st-nexus</id>
+      <url>https://nexus.stvolov.site/repository/maven-releases/</url>
+    </repository>
+  </distributionManagement>
+
+  <repositories>
+    <repository>
+      <id>st-nexus</id>
+      <url>https://nexus.stvolov.site/repository/maven-releases/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>st-nexus-snapshots</id>
+      <url>https://nexus.stvolov.site/repository/maven-snapshots/</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <artifactId>the-helper</artifactId>
+      <groupId>ru.stvolov</groupId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.gluegen-rt</groupId>
+      <artifactId>gluegen-rt</artifactId>
+      <version>1.0.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/gluegen-rt.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>org.gluegen-rt</groupId>
+      <artifactId>gluegen-rt-natives-linux-amd64</artifactId>
+      <version>1.0.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/gluegen-rt-natives-linux-amd64.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>org.gluegen-rt</groupId>
+      <artifactId>gluegen-rt-natives-linux-i586</artifactId>
+      <version>1.0.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/gluegen-rt-natives-linux-i586.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>org.gluegen-rt</groupId>
+      <artifactId>gluegen-rt-natives-windows-amd64</artifactId>
+      <version>1.0.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/gluegen-rt-natives-windows-amd64.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>org.gluegen-rt</groupId>
+      <artifactId>gluegen-rt-natives-windows-i586</artifactId>
+      <version>1.0.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/gluegen-rt-natives-windows-i586.jar</systemPath>
+    </dependency>
+
+
+
+
+    <dependency>
+      <groupId>org.jogl-all</groupId>
+      <artifactId>jogl-all</artifactId>
+      <version>1.0.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/jogl-all.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jogl-all</groupId>
+      <artifactId>jogl-all-natives-linux-amd64</artifactId>
+      <version>1.0.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/jogl-all-natives-linux-amd64.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jogl-all</groupId>
+      <artifactId>jogl-all-natives-linux-i586</artifactId>
+      <version>1.0.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/jogl-all-natives-linux-i586.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jogl-all</groupId>
+      <artifactId>jogl-all-natives-windows-amd64</artifactId>
+      <version>1.0.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/jogl-all-natives-windows-amd64.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jogl-all</groupId>
+      <artifactId>jogl-all-natives-windows-i586</artifactId>
+      <version>1.0.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/jogl-all-natives-windows-i586.jar</systemPath>
+    </dependency>
+
+  </dependencies>
+
+  <profiles>
+    <profile>
+      <id>local</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <!--            <mvn.log4j.path/>-->
+      </properties>
+      <build>
+        <resources>
+          <resource>
+            <directory>../analytics-web/src/main/profiles/local</directory>
+            <filtering>true</filtering>
+          </resource>
+          <resource>
+            <directory>src/main/resources</directory>
+            <filtering>true</filtering>
+          </resource>
+        </resources>
+      </build>
+    </profile>
+
+    <profile>
+      <id>prod</id>
+      <properties>
+
+      </properties>
+      <build>
+        <resources>
+          <resource>
+            <directory>../analytics-web/src/main/profiles/prod</directory>
+            <filtering>true</filtering>
+          </resource>
+          <resource>
+            <directory>src/main/resources</directory>
+            <filtering>true</filtering>
+          </resource>
+        </resources>
+      </build>
+    </profile>
+  </profiles>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <finalName>${artifactId}-${version}</finalName>
+          <appendAssemblyId>false</appendAssemblyId>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>staticParser.Main</mainClass>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+            </manifest>
+            <manifestEntries>
+              <Class-Path>libs/opencv-430-1.0.0.jar libs/gluegen-rt-1.0.0.jar libs/jogl-all-1.0.0.jar libs/jogl-all-natives-linux-amd64-1.0.0.jar libs/gluegen-rt-natives-linux-amd64-1.0.0.jar</Class-Path>
+            </manifestEntries>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
 
 </project>

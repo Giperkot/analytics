@@ -85,14 +85,16 @@ public class ParserDao extends AbstractDao {
 
     }
 
-    public List<DirectionUrlEntity> getUrlsByDirection(Connection connection, EDirectionName directionName) {
+    public List<DirectionUrlEntity> getUrlsByDirection(Connection connection, EDirectionName directionName, String cityName) {
 
         String sql = "select du.* from parser.direction d"
                 + "    join parser.direction_url du on d.id = du.direction_id"
-                + " where d.name = ?";
+                + "    join realty.city c on c.id = du.city_id"
+                + " where d.name = ? and c.name = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, directionName.getName());
+            statement.setString(2, cityName);
             ResultSet resultSet = statement.executeQuery();
 
             return mappingMultipleResult(resultSet, DirectionUrlEntity.class);

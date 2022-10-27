@@ -89,7 +89,7 @@ public class AvitoParserService {
         try {
             Connection connection = requestHelper.getConnection();
 
-            List<DirectionUrlEntity> directionUrlEntityList = parserDao.getUrlsByDirection(connection, EDirectionName.REALTY_SALE);
+            List<DirectionUrlEntity> directionUrlEntityList = parserDao.getUrlsByDirection(connection, EDirectionName.REALTY_SALE, "Москва");
 
             DirectionUrlEntity directionUrlEntity = directionUrlEntityList.get(0);
             String url = directionUrlEntity.getUrl();

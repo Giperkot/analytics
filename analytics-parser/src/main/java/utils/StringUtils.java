@@ -7,7 +7,9 @@ public class StringUtils {
     private static Pattern notNumberPattern = Pattern.compile("^[0-9]+");
 
     public static String trimWhitespace(String source) {
-        return source.replace('\u00A0',' ').trim();
+        return source.replace('\u00A0',' ')
+                     .replace("\u0000", "")
+                     .trim();
     }
 
     private static boolean isItNumber(char ch) {

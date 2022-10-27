@@ -7,3 +7,4 @@ package-lock.json
 analytics-dao/target/*
 analytics-web/target/*
 analytics-parser/target/*
+analytics-browser/target/*
