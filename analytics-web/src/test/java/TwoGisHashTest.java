@@ -1,4 +1,4 @@
-import dto.twogis.KeyValue;
+import dto.parser.KeyValue;
 
 import java.util.ArrayList;
 import java.util.List;

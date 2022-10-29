@@ -1,3 +1,5 @@
+import db.entity.parser.ParseTaskEntity;
+import dto.parser.NoticeEntityWrapper;
 import service.avito.service.AvitoParser;
 import utils.StringUtils;
 
@@ -16,19 +18,20 @@ public class ParserTest {
     public static void main(String[] args) throws InterruptedException, IOException, URISyntaxException, ClassNotFoundException {
         AvitoParser avitoParser = AvitoParser.getInstance();
 
-        Set<String> strSet = Set.of("1234");
+        /*Set<String> strSet = Set.of("1234");
 
-        System.out.println(strSet.contains(null));;
+        System.out.println(strSet.contains(null));;*/
 
-        /*
+        Map<String, String> headerMap = avitoParser.initHeaders();
         ParseTaskEntity parseTaskEntity = new ParseTaskEntity();
         // parseTaskEntity.setUrl("https://www.avito.ru/perm/kvartiry/1-k._kvartira_35m_110et._2455378873");
-        parseTaskEntity.setUrl("https://www.avito.ru/perm/kvartiry/1-k._kvartira_316m_25et._2500563396");
+        // parseTaskEntity.setUrl("https://www.avito.ru/perm/kvartiry/1-k._kvartira_316m_25et._2500563396");
+        parseTaskEntity.setUrl("/moskva/kvartiry/2-k._kvartira_602m_48et._2564887698");
 
-        NoticeEntityWrapper noticeEntityWrapper = avitoParser.parseDetailNotice(parseTaskEntity);
+        NoticeEntityWrapper noticeEntityWrapper = avitoParser.parseDetailNotice(headerMap, parseTaskEntity);
 
         int i = 0;
-        */
+
 
         // initRequestTest();
 

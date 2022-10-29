@@ -1,10 +1,12 @@
 package service.avito.service;
 
 import common.CommonUtils;
+import consts.ProjectConst;
 import dao.parser.ParserDao;
 import db.entity.parser.NoticeEntity;
 import db.entity.parser.ParseTaskEntity;
 import dto.parser.FeatureDto;
+import dto.parser.KeyValue;
 import dto.parser.NoticeEntityWrapper;
 import enums.ENoticeStatus;
 import enums.EParserStatus;
@@ -169,6 +171,48 @@ public class AvitoParser extends AbstractParser {
         return liList2;
     }
 
+    private List<KeyValue> getMetroParams(Element metroCandidat) {
+        // Elements elms = metroCandidat.getElementsByAttributeValueStarting("class", "style-item-address-georeferences-item");
+        List<Element> elms = new ArrayList<>();
+        Elements childrenRoot = metroCandidat.children();
+        for (int i = 0; i < childrenRoot.size(); i++) {
+            if (childrenRoot.get(i).className().startsWith("style-item-address-georeferences-item")) {
+                elms.add(childrenRoot.get(i));
+            }
+        }
+
+        List<KeyValue> keyValueList = new ArrayList<>();
+
+        for (int i = 0; i < elms.size(); i++) {
+            Element elm = elms.get(i);
+
+            String station = "";
+            String nearTime = "";
+
+            Element metroElm = elm.select("span").get(0);
+            for (int j = 0; j < metroElm.children().size(); j++) {
+                if (!metroElm.children().get(j).hasAttr("class")) {
+                    station = metroElm.children().get(j).text();
+                    break;
+                }
+            }
+
+            Elements children = elm.children();
+            for (int j = 0; j < children.size(); j++) {
+                if (children.get(j).className().startsWith("style-item-address-georeferences-item-interval")) {
+                    nearTime = children.get(j).text();
+                    break;
+                }
+            }
+
+            KeyValue metroInfo = new KeyValue(station, nearTime);
+
+            keyValueList.add(metroInfo);
+        }
+
+        return keyValueList;
+    }
+
     private NoticeEntityWrapper createDeletedBy301Notice(ParseTaskEntity parseTaskEntity, String location) {
         NoticeEntity noticeEntity = new NoticeEntity();
         noticeEntity.setTitle(parseTaskEntity.getTitle());
@@ -176,7 +220,7 @@ public class AvitoParser extends AbstractParser {
         noticeEntity.setStatus(ENoticeStatus.DELETED_301);
         noticeEntity.setSum(0D);
 
-        return new NoticeEntityWrapper(noticeEntity, null, location);
+        return new NoticeEntityWrapper(noticeEntity, new ArrayList<>(), location);
     }
 
     private NoticeEntityWrapper createRemovedFromPublicationNotice(ParseTaskEntity parseTaskEntity,
@@ -277,6 +321,7 @@ public class AvitoParser extends AbstractParser {
             }
 
             Elements addressElms = detailPage.select("div[itemprop=address] span");
+            Elements afterAddressElms = detailPage.select("div[itemprop=address] div span");
             Elements descroptionElms = detailPage.select("div[itemprop=description");
 
             if (addressElms.size() < 1 || sumElms.size() < 1) {
@@ -301,14 +346,18 @@ public class AvitoParser extends AbstractParser {
 
             }
 
+            if (!afterAddressElms.isEmpty()) {
+                List<KeyValue> metroInfoList = getMetroParams(afterAddressElms.get(0));
+                featureDtoList.add(new FeatureDto("Метро", ProjectConst.MAPPER.writeValueAsString(metroInfoList)));
+            }
+
             NoticeEntity noticeEntity = new NoticeEntity();
             noticeEntity.setTitle(parseTaskEntity.getTitle());
             noticeEntity.setParseTaskId(parseTaskEntity.getId());
-            noticeEntity.setAddress(addressElms.get(0).text());
-            noticeEntity.setDescription(descroptionElms.get(0).text());
+            noticeEntity.setAddress(StringUtils.trimWhitespace(addressElms.get(0).text()));
+            noticeEntity.setDescription(StringUtils.trimWhitespace(descroptionElms.get(0).text()));
             noticeEntity.setParseTaskId(parseTaskEntity.getId());
             noticeEntity.setSum(Double.valueOf(StringUtils.getOnlyNumbers(sumElms.get(0).text())));
-            // noticeEntity.setTitle(parseTaskEntity.getTitle());
             noticeEntity.setStatus(ENoticeStatus.ACTIVE);
 
             return new NoticeEntityWrapper(noticeEntity, featureDtoList);

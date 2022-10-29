@@ -11,6 +11,7 @@ import dto.geocode.yandex.GeoObjectCollection;
 import dto.realty.BoundsDto;
 import dto.realty.CoordPoint;
 import dto.realty.HouseCoords;
+import enums.realty.EStreetType;
 import repository.geocoder.IGeocoder;
 
 import java.net.URI;
@@ -46,10 +47,10 @@ public class NominationHttpRepository implements IGeocoder {
     private final HttpClient client;
 
     @Override
-    public List<CommonCoordsDto> getHouseByAddress(String cityName, String street, String houseNum) {
+    public List<CommonCoordsDto> getHouseByAddress(String cityName, String street, EStreetType streetType, String houseNum) {
         try {
             String url = "https://nominatim.openstreetmap.org/search.php?q=" +
-                    URLEncoder.encode(cityName + " " + street + " " + houseNum, StandardCharsets.UTF_8) + "&format=jsonv2" +
+                    URLEncoder.encode(cityName + " " + streetType.getFiasShortName() + " " + street + " " + houseNum, StandardCharsets.UTF_8) + "&format=jsonv2" +
                     "&city=" + cityName +"&limit=50";
 
             HttpRequest.Builder builder = HttpRequest
@@ -75,8 +76,8 @@ public class NominationHttpRepository implements IGeocoder {
                 String[] bounds = nominationCoordinatesDto.getBoundingbox();
                 BoundsDto boundsDto = new BoundsDto();
                 // Верхний правый и нижний левый угол.
-                boundsDto.setUpper(new CoordPoint(Double.parseDouble(bounds[1]), Double.parseDouble(bounds[3])));
-                boundsDto.setLower(new CoordPoint(Double.parseDouble(bounds[0]), Double.parseDouble(bounds[2])));
+                boundsDto.setUpper(new CoordPoint(Double.parseDouble(bounds[3]), Double.parseDouble(bounds[1])));
+                boundsDto.setLower(new CoordPoint(Double.parseDouble(bounds[2]), Double.parseDouble(bounds[0])));
 
                 CommonCoordsDto commonCoordsDto = new CommonCoordsDto();
 

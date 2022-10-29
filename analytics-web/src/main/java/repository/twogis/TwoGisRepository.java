@@ -1,7 +1,7 @@
 package repository.twogis;
 
 import consts.ProjectConst;
-import dto.twogis.KeyValue;
+import dto.parser.KeyValue;
 import dto.twogis.SearchHouseDto;
 import exceptions.YandexBadRequestException;
 import org.slf4j.Logger;

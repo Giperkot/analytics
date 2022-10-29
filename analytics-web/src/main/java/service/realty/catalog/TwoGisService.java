@@ -3,6 +3,7 @@ package service.realty.catalog;
 import consts.ProjectConst;
 import db.entity.realty.HouseAddInfoEntity;
 import db.entity.realty.HouseEntity;
+import dto.parser.KeyValue;
 import dto.realty.BoundsDto;
 import dto.realty.CoordPoint;
 import dto.task.ConsoleResultWrapperDto;

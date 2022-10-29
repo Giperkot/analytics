@@ -17,6 +17,7 @@ import dto.report.NoticeWrapper;
 import dto.report.RealtyConfigurationDto;
 import dto.report.RequestReportDto;
 import enums.EDirectionName;
+import enums.realty.EStreetType;
 import enums.report.*;
 import exceptions.NoCoordsInCityException;
 import gnu.trove.map.hash.TLongObjectHashMap;
@@ -232,9 +233,11 @@ public class RealtyService extends AbstractParser {
             }
         }
 
+        EStreetType streetType = EStreetType.getStreetType(street);
+
         street = street.replaceAll("ул\\.|улица|ш\\.|б-р|пр-т|пр\\.", "").trim();
 
-        return new HouseDto(street, houseNum);
+        return new HouseDto(street, streetType, houseNum);
     }
 
     private void determineAddress(Connection connection, VNoticeEntity noticeEntity, IGeocoder forcedGeoRepo) {
@@ -248,18 +251,22 @@ public class RealtyService extends AbstractParser {
         HouseDto houseDto = getHouseAddr(address, noticeEntity.getId());
         String street = houseDto.getStreet();
         String houseNum = houseDto.getHouseNum();
+        EStreetType streetType = houseDto.getStreetType();
 
         CityEntity cityEntity = realtyDao.getCityById(connection, noticeEntity.getCityId());
 
         try {
             // Проверить, есть ли адрес в БД.
-            HouseEntity houseEntity = realtyDao.getHouseByAddress(connection, street, houseNum, noticeEntity.getCityId());
+            HouseEntity houseEntity = realtyDao.getHouseByAddress(connection, street, streetType, houseNum, cityEntity);
 
             if (houseEntity == null) {
+
+                long fiasStreet = realtyDao.findFiasStreet(connection, cityEntity.getFiasId(), street, streetType);
+
                 // Сейчас нужно получить координаты по адресу.
                 List<CommonCoordsDto> rawCoordinatesDto = (forcedGeoRepo == null) ? geocodeHttpRepository
-                        .getHouseByAddress(noticeEntity.getCityName(), street, houseNum)
-                        : forcedGeoRepo.getHouseByAddress(noticeEntity.getCityName(), street, houseNum);
+                        .getHouseByAddress(noticeEntity.getCityName(), street, streetType, houseNum)
+                        : forcedGeoRepo.getHouseByAddress(noticeEntity.getCityName(), street, streetType, houseNum);
 
                 if (CommonUtils.isNullOrEmpty(rawCoordinatesDto)) {
                     if (!address.contains(noticeEntity.getCityName())) {
@@ -311,6 +318,7 @@ public class RealtyService extends AbstractParser {
                 houseEntity.setStreet(street);
                 houseEntity.setDistrictId(houseDistrict.getId());
                 houseEntity.setCoords(houseCoords);
+                houseEntity.setFiasStreet(fiasStreet);
 
                 if (houseEntity.getId() != -1) {
                     // Сохранить новый дом в БД.

@@ -8,6 +8,7 @@ import dto.geocode.CommonCoordsDto;
 import dto.geocode.yandex.CoordinatesDto;
 import dto.geocode.yandex.FeatureMember;
 import dto.realty.HouseCoords;
+import enums.realty.EStreetType;
 import exceptions.YandexBadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,10 +48,10 @@ public class YandexHttpRepository implements IGeocoder {
 
     private final HttpClient client;
 
-    public List<CommonCoordsDto> getHouseByAddress(String cityName, String street, String houseNum) {
+    public List<CommonCoordsDto> getHouseByAddress(String cityName, String street, EStreetType streetType, String houseNum) {
         try {
             String url = "https://geocode-maps.yandex.ru/1.x/?geocode=" +
-                    URLEncoder.encode(cityName + " " + street + " " + houseNum, "UTF-8") + "&apikey=" + apiKey;
+                    URLEncoder.encode(cityName + " " + streetType.getFiasShortName() + " " + street + " " + houseNum, "UTF-8") + "&apikey=" + apiKey;
 
             HttpRequest.Builder builder = HttpRequest
                     .newBuilder(new URI(url))

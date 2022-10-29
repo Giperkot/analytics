@@ -27,6 +27,9 @@ public class HouseEntity extends BaseEntity {
     @Column(name = "coords", sqlType = "jsonb")
     private HouseCoords coords;
 
+    @Column(name = "fias_street")
+    private long fiasStreet;
+
     public String getStreet() {
         return street;
     }
@@ -65,5 +68,21 @@ public class HouseEntity extends BaseEntity {
 
     public void setCoords(HouseCoords coords) {
         this.coords = coords;
+    }
+
+    public void setDistrictId(long districtId) {
+        this.districtId = districtId;
+    }
+
+    public void setCityId(long cityId) {
+        this.cityId = cityId;
+    }
+
+    public long getFiasStreet() {
+        return fiasStreet;
+    }
+
+    public void setFiasStreet(long fiasStreet) {
+        this.fiasStreet = fiasStreet;
     }
 }

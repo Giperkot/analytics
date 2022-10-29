@@ -40,9 +40,9 @@ public class AddressTest {
 
         houseDto = realtyService.getHouseAddr("ул. Ветлужская, д. 30", -1);
         System.out.println(houseDto.getStreet() + " | " + houseDto.getHouseNum());
-        houseDto = realtyService.getHouseAddr("", -1);
+        houseDto = realtyService.getHouseAddr("Москва, Ярославское ш., 116к2", -1);
         System.out.println(houseDto.getStreet() + " | " + houseDto.getHouseNum());
-        houseDto = realtyService.getHouseAddr("", -1);
+        houseDto = realtyService.getHouseAddr("ул. Красного Маяка, вл. 26", -1);
         System.out.println(houseDto.getStreet() + " | " + houseDto.getHouseNum());
     }
 }

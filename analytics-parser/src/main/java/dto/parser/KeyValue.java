@@ -1,4 +1,4 @@
-package dto.twogis;
+package dto.parser;
 
 public class KeyValue {
 

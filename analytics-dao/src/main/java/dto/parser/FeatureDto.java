@@ -6,6 +6,14 @@ public class FeatureDto {
 
     private String value;
 
+    public FeatureDto() {
+    }
+
+    public FeatureDto(String name, String value) {
+        this.name = name;
+        this.value = value;
+    }
+
     public String getName() {
         return name;
     }
