@@ -1,17 +1,25 @@
 package dto.realty;
 
+import db.entity.realty.CityEntity;
+
 public class CityDto {
 
     private long id;
 
     private String name;
 
+    private double latitude;
+
+    private double longitude;
+
     public CityDto() {
     }
 
-    public CityDto(long id, String name) {
-        this.id = id;
-        this.name = name;
+    public CityDto(CityEntity entity) {
+        this.id = entity.getId();
+        this.name = entity.getName();
+        longitude = entity.getLongitude();
+        latitude = entity.getLatitude();
     }
 
     public long getId() {
@@ -28,5 +36,21 @@ public class CityDto {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 }

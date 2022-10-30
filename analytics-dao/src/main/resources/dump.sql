@@ -434,5 +434,9 @@ alter table realty.city
 alter table realty.city
     alter column fias_id set not null;
 
+alter table realty.city
+    add column lat double precision not null default 0,
+    add column lng double precision not null default 0;
+
 alter table realty.house
     add column fias_street bigint;

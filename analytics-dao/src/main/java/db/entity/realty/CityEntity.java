@@ -21,6 +21,12 @@ public class CityEntity extends BaseEntity {
     @Column(name = "fias_id")
     private long fiasId;
 
+    @Column(name = "lat")
+    private double latitude;
+
+    @Column(name = "lng")
+    private double longitude;
+
     public String getName() {
         return name;
     }
@@ -43,5 +49,21 @@ public class CityEntity extends BaseEntity {
 
     public void setFiasId(long fiasId) {
         this.fiasId = fiasId;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 }

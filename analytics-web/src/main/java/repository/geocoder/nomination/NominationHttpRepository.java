@@ -50,7 +50,7 @@ public class NominationHttpRepository implements IGeocoder {
     public List<CommonCoordsDto> getHouseByAddress(String cityName, String street, EStreetType streetType, String houseNum) {
         try {
             String url = "https://nominatim.openstreetmap.org/search.php?q=" +
-                    URLEncoder.encode(cityName + " " + streetType.getFiasShortName() + " " + street + " " + houseNum, StandardCharsets.UTF_8) + "&format=jsonv2" +
+                    URLEncoder.encode(cityName + " " + street + " " + houseNum, StandardCharsets.UTF_8) + "&format=jsonv2" +
                     "&city=" + cityName +"&limit=50";
 
             HttpRequest.Builder builder = HttpRequest
@@ -66,6 +66,10 @@ public class NominationHttpRepository implements IGeocoder {
 
             for (NominationCoordinatesDto nominationCoordinatesDto : nominationCoordinatesArr) {
                 if (!"building".equals(nominationCoordinatesDto.getCategory())) {
+                    continue;
+                }
+
+                if (!containsStreetType(nominationCoordinatesDto.getDisplayName(), streetType)) {
                     continue;
                 }
 

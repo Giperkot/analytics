@@ -60,6 +60,7 @@ public class RealtyService extends AbstractParser {
 
     private final RealtyMapper realtyMapper = new RealtyMapperImpl();
 
+    private static String CLEAN_STREET_REGEXP = EStreetType.createStringRegexp();
 
     private RealtyService() {
     }
@@ -235,7 +236,13 @@ public class RealtyService extends AbstractParser {
 
         EStreetType streetType = EStreetType.getStreetType(street);
 
-        street = street.replaceAll("ул\\.|улица|ш\\.|б-р|пр-т|пр\\.", "").trim();
+        // "ул\\.|улица|ш\\.|б-р|пр-т|пр\\.|аллея|шоссе|микрорайон|пер."
+        street = street.replaceAll(CLEAN_STREET_REGEXP, "")
+                       .replaceAll("[ ]{2,}", " ").trim();
+
+        if (street.contains("ё")) {
+            street = street.replace('ё', 'е');
+        }
 
         return new HouseDto(street, streetType, houseNum);
     }
@@ -263,6 +270,16 @@ public class RealtyService extends AbstractParser {
 
                 long fiasStreet = realtyDao.findFiasStreet(connection, cityEntity.getFiasId(), street, streetType);
 
+                if (fiasStreet < 0) {
+                    if (!address.contains(cityEntity.getName())) {
+                        // Это нормально. Нужно пропустить.
+                        saveEmptyAddress(connection, noticeEntity);
+                        return;
+                    }
+
+                    throw new RuntimeException("Улица не найдена");
+                }
+
                 // Сейчас нужно получить координаты по адресу.
                 List<CommonCoordsDto> rawCoordinatesDto = (forcedGeoRepo == null) ? geocodeHttpRepository
                         .getHouseByAddress(noticeEntity.getCityName(), street, streetType, houseNum)
@@ -287,7 +304,7 @@ public class RealtyService extends AbstractParser {
                 }
 
                 if (coordinatesDto.isEmpty()) {
-                    if (!address.contains(noticeEntity.getCityName())) {
+                    if (!address.contains(noticeEntity.getCityName()) || streetType == EStreetType.CITY) {
                         saveEmptyAddress(connection, noticeEntity);
                         return;
                     }
@@ -376,7 +393,7 @@ public class RealtyService extends AbstractParser {
         List<CityDto> result = new ArrayList<>();
 
         for (CityEntity cityEntity : cityEntityList) {
-            result.add(new CityDto(cityEntity.getId(), cityEntity.getName()));
+            result.add(new CityDto(cityEntity));
         }
 
         return result;

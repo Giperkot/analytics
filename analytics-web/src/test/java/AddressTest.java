@@ -1,5 +1,6 @@
 import core.AnalyticsContext;
 import dto.realty.HouseDto;
+import enums.realty.EStreetType;
 import service.realty.RealtyService;
 
 import javax.servlet.ServletContextEvent;
@@ -44,5 +45,7 @@ public class AddressTest {
         System.out.println(houseDto.getStreet() + " | " + houseDto.getHouseNum());
         houseDto = realtyService.getHouseAddr("ул. Красного Маяка, вл. 26", -1);
         System.out.println(houseDto.getStreet() + " | " + houseDto.getHouseNum());
+
+        System.out.println(EStreetType.createStringRegexp());
     }
 }

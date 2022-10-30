@@ -79,13 +79,14 @@ public class RealtyDao extends AbstractDao {
     }
 
     public long findFiasStreet(Connection connection, long fiasCityId, String street, EStreetType streetType) {
-        String sql = "select id from realty.fias_addr"
-                + "where city_id = ? and fa.off_name = ? and fa.shortname = ?";
+        String sql = "select id from realty.fias_addr fa"
+                + " where fa.city_id = ? and (fa.off_name = ? or fa.formal_name = ?) and fa.shortname = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, fiasCityId);
             statement.setString(2, street);
-            statement.setString(3, streetType.getFiasShortName());
+            statement.setString(3, street);
+            statement.setString(4, streetType.getFiasShortName());
 
             ResultSet resultSet = statement.executeQuery();
 
@@ -93,7 +94,7 @@ public class RealtyDao extends AbstractDao {
                 return resultSet.getLong("id");
             }
 
-            throw new RuntimeException("Улица не найдена");
+            return -1;
         } catch (SQLException ex) {
             throw new RuntimeException(ex);
         }
@@ -103,14 +104,15 @@ public class RealtyDao extends AbstractDao {
 
         String sql = "select h.* from realty.house h "
                 + "    join realty.fias_addr fa on h.fias_street = fa.id "
-                + "where h.house_num = ? and h.city_id = ? and fa.off_name = ? and fa.city_id = ? and fa.shortname = ?";
+                + "where h.house_num = ? and h.city_id = ? and (fa.off_name = ? or fa.formal_name = ?) and fa.city_id = ? and fa.shortname = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, houseNum);
             statement.setLong(2, cityEntity.getId());
             statement.setString(3, street);
-            statement.setLong(4, cityEntity.getFiasId());
-            statement.setString(5, streetType.getFiasShortName());
+            statement.setString(4, street);
+            statement.setLong(5, cityEntity.getFiasId());
+            statement.setString(6, streetType.getFiasShortName());
 
             ResultSet resultSet = statement.executeQuery();
 
@@ -122,7 +124,7 @@ public class RealtyDao extends AbstractDao {
     }
 
     public List<CityEntity> getCityEntityList(Connection connection) {
-        String sql = "select id, name from realty.city";
+        String sql = "select id, name, lat, lng from realty.city";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             ResultSet resultSet = statement.executeQuery();

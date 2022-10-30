@@ -51,7 +51,7 @@ public class YandexHttpRepository implements IGeocoder {
     public List<CommonCoordsDto> getHouseByAddress(String cityName, String street, EStreetType streetType, String houseNum) {
         try {
             String url = "https://geocode-maps.yandex.ru/1.x/?geocode=" +
-                    URLEncoder.encode(cityName + " " + streetType.getFiasShortName() + " " + street + " " + houseNum, "UTF-8") + "&apikey=" + apiKey;
+                    URLEncoder.encode(cityName + " " + street + " " + houseNum, "UTF-8") + "&apikey=" + apiKey;
 
             HttpRequest.Builder builder = HttpRequest
                     .newBuilder(new URI(url))
@@ -73,6 +73,10 @@ public class YandexHttpRepository implements IGeocoder {
 
                 String displayName = featureMember.getGeoObject().getDescription() +
                         " " + featureMember.getGeoObject().getName();
+
+                if (!containsStreetType(displayName, streetType)) {
+                    continue;
+                }
 
                 CommonCoordsDto commonCoordsDto = new CommonCoordsDto();
                 commonCoordsDto.setHouseCoords(houseCoords);
