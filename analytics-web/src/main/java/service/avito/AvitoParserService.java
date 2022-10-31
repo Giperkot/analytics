@@ -75,6 +75,30 @@ public class AvitoParserService {
         return baseUrl + "?p=" + pageNumber;
     }
 
+    private void parseInfoFromDirection(Connection connection, DirectionUrlEntity directionUrlEntity) throws InterruptedException, IOException, URISyntaxException, SQLException {
+        String url = directionUrlEntity.getUrl();
+
+        Map<String, String> headerMap = avitoParser.initHeaders();
+
+        Document noticesContent = avitoParser.getContentByUrl(url, headerMap);
+
+        // Получить количество страниц.
+        int lastPage = avitoParser.findLastPage(noticesContent);
+
+        parseAndSave(connection, noticesContent, directionUrlEntity.getId());
+
+        for (int i = 2; i < lastPage + 1; i++) {
+            String nextUrl = this.nextUrl(url, i);
+
+            Document noticesContentPage = avitoParser.getContentByUrl(nextUrl, headerMap);
+            parseAndSave(connection, noticesContentPage, directionUrlEntity.getId());
+
+            Thread.sleep(5000);
+
+            connection.commit();
+        }
+    }
+
     // todo Распихать по направлениям...
     public String parseNoticeList(RequestHelper requestHelper) throws IOException, URISyntaxException, InterruptedException, SQLException {
 
@@ -91,28 +115,11 @@ public class AvitoParserService {
 
             List<DirectionUrlEntity> directionUrlEntityList = parserDao.getUrlsByDirection(connection, EDirectionName.REALTY_SALE, "Москва");
 
-            DirectionUrlEntity directionUrlEntity = directionUrlEntityList.get(0);
-            String url = directionUrlEntity.getUrl();
-
-            Map<String, String> headerMap = avitoParser.initHeaders();
-
-            Document noticesContent = avitoParser.getContentByUrl(url, headerMap);
-
-            // Получить количество страниц.
-            int lastPage = avitoParser.findLastPage(noticesContent);
-
-            parseAndSave(connection, noticesContent, directionUrlEntity.getId());
-
-            for (int i = 2; i < lastPage + 1; i++) {
-                String nextUrl = this.nextUrl(url, i);
-
-                Document noticesContentPage = avitoParser.getContentByUrl(nextUrl, headerMap);
-                parseAndSave(connection, noticesContentPage, directionUrlEntity.getId());
-
-                Thread.sleep(5000);
-
-                connection.commit();
+            // DirectionUrlEntity directionUrlEntity = directionUrlEntityList.get(0);
+            for (DirectionUrlEntity directionUrlEntity : directionUrlEntityList) {
+                parseInfoFromDirection(connection, directionUrlEntity);
             }
+
         } finally {
             synchronized (parseInProcess) {
                 parseInProcess.setLocked(false);

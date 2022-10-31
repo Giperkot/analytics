@@ -8,6 +8,8 @@ import dto.geocode.CommonCoordsDto;
 import dto.geocode.yandex.CoordinatesDto;
 import dto.geocode.yandex.FeatureMember;
 import dto.realty.HouseCoords;
+import dto.realty.HouseDto;
+import dto.realty.StreetDto;
 import enums.realty.EStreetType;
 import exceptions.YandexBadRequestException;
 import org.slf4j.Logger;
@@ -48,10 +50,12 @@ public class YandexHttpRepository implements IGeocoder {
 
     private final HttpClient client;
 
-    public List<CommonCoordsDto> getHouseByAddress(String cityName, String street, EStreetType streetType, String houseNum) {
+    public List<CommonCoordsDto> getHouseByAddress(String cityName, HouseDto houseDto, String originalAddr) {
         try {
+            String query = createQuery(cityName, houseDto);
+
             String url = "https://geocode-maps.yandex.ru/1.x/?geocode=" +
-                    URLEncoder.encode(cityName + " " + street + " " + houseNum, "UTF-8") + "&apikey=" + apiKey;
+                    URLEncoder.encode(query, "UTF-8") + "&apikey=" + apiKey;
 
             HttpRequest.Builder builder = HttpRequest
                     .newBuilder(new URI(url))
@@ -67,6 +71,7 @@ public class YandexHttpRepository implements IGeocoder {
 
             List<FeatureMember> featureMemberList = coordinatesDto.getGeoObjectCollection().getFeatureMemberList();
             List<CommonCoordsDto> result = new ArrayList<>();
+            StreetDto streetDto = houseDto.getStreet();
 
             for (FeatureMember featureMember : featureMemberList) {
                 HouseCoords houseCoords = realtyConverter.toHouseCoords(featureMember.getGeoObject());
@@ -74,7 +79,8 @@ public class YandexHttpRepository implements IGeocoder {
                 String displayName = featureMember.getGeoObject().getDescription() +
                         " " + featureMember.getGeoObject().getName();
 
-                if (!containsStreetType(displayName, streetType)) {
+                if (streetDto.getStreetType() != null && !houseDto.getStreet().getStreetType().containsStreetType(displayName)
+                        || !displayName.contains(cityName)) {
                     continue;
                 }
 

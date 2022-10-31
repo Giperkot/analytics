@@ -1,18 +1,25 @@
 package enums.realty;
 
+import java.util.regex.Pattern;
+
 public enum EStreetType {
 
-    STREET(1, "ул", "ул.", "улица", "аллея"),
-    AVENUE(2, "пр-кт", "пр-т", "проспект"),
-    LANE(3, "пер", "пер.", "переулок"),
-    DIRECTIONS(4, "пр-д", "проезд", "пр."),
-    BOULEVARD(5, "б-р", "б-р", "бульвар"),
-    HIGHWAY(6, "ш", "ш.", "шоссе"),
-    VILLAGE(7, "пос", "пос."),
-    // Да, и такое бывает
-    CITY(8, "г", "г.", "город", "Зеленоград"),
-    MICRODISTRICT(9, "мкр.", "мкр.", "микрорайон"),
-    SEAFRONT(10, "наб", "наб.", "набережная");
+    UNKNOWN(0, "", "UNKNOWN", "", "UNKNOWN"),
+    STREET(1, "ул.", "ул", "","ул.", "улица"),
+    AVENUE(2, "пр-т", "пр-кт", "","пр-т", "проспект"),
+    LANE(3, "пер.", "пер", "","пер.", "переулок"),
+    DIRECTIONS(4, "пр.", "пр-д", "","проезд", "пр."),
+    BOULEVARD(5, "б-р", "б-р", "","б-р", "бульвар"),
+    HIGHWAY(6, "ш.", "ш", "","ш.", "шоссе"),
+    MICRODISTRICT(7, "мкр.", "мкр.", "","мкр.", "микрорайон"),
+    SEAFRONT(8, "наб.", "наб", "","наб.", "набережная"),
+    QUARTER(9, "кв-л", "кв-л", "|№","квартал", "кв-л"),
+    DEAD_END(10, "туп.", "туп", "","тупик", "туп."),
+    ALLEY(11, "ал.", "аллея", "", "аллея", "ал."),
+    RESIDENT_COMPLEX(12, "жк.", "", "", "жилой комплекс", "жк.", "ЖК"),
+    SNT(12, "снт.", "", "", "садоводческое некоммерческое товарищество", "снт."),
+    LINE(13, "лин.", "", "", "линия", "лин."),
+    SQUARE(14, "пл.", "", "", "пл.", "площадь");
 
     private static EStreetType[] values = values();
 
@@ -20,12 +27,28 @@ public enum EStreetType {
 
     private final String fiasShortName;
 
+    private final String canonShortName;
+
     private final String[] titleArr;
 
-    EStreetType(int id, String fiasShortName, String... titleArr) {
+    private final Pattern clearRegexp;
+
+    EStreetType(int id, String canonShortName, String fiasShortName, String toClear, String... titleArr) {
         this.id = id;
+        this.canonShortName = canonShortName;
         this.fiasShortName = fiasShortName;
         this.titleArr = titleArr;
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < this.titleArr.length; i++) {
+            sb.append(this.titleArr[i].replaceAll("\\.", "\\\\."));
+
+            if (i < titleArr.length - 1) {
+                sb.append("|");
+            }
+        }
+
+        clearRegexp = Pattern.compile(sb.toString() + toClear);
     }
 
     public static EStreetType getStreetType(String street) {
@@ -37,20 +60,26 @@ public enum EStreetType {
             }
         }
 
-        throw new IllegalArgumentException("Тип улицы не найден.");
+        return EStreetType.UNKNOWN;
     }
 
-    public static String createStringRegexp() {
-        StringBuilder sb = new StringBuilder();
+    public String toGeocodeStr(String streetStr) {
+        switch (this) {
+            case QUARTER:
+                return "квартал " + streetStr;
+            default:
+                return streetStr;
+        }
+    }
 
-        for (EStreetType streetType : values) {
-            for (String shortName : streetType.titleArr) {
-                sb.append(shortName.replaceAll("\\.", "\\\\.") + "|");
+    public boolean containsStreetType(String address) {
+        for (String streetShortname : this.titleArr) {
+            if (address.contains(streetShortname)) {
+                return true;
             }
         }
 
-        sb.delete(sb.length() - 1, sb.length());
-        return sb.toString();
+        return false;
     }
 
     public int getId() {
@@ -63,5 +92,13 @@ public enum EStreetType {
 
     public String getFiasShortName() {
         return fiasShortName;
+    }
+
+    public Pattern getClearRegexp() {
+        return clearRegexp;
+    }
+
+    public String getCanonShortName() {
+        return canonShortName;
     }
 }

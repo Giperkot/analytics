@@ -13,7 +13,8 @@ public enum EFeatureExactName {
     HOUSE_TYPE("HOUSE_TYPE"),
     ROOM_COUNT("ROOM_COUNT"),
     KITCHEN_AREA("KITCHEN_AREA"),
-    LIVING_AREA("LIVING_AREA");
+    LIVING_AREA("LIVING_AREA"),
+    METRO("METRO");
 
     private static final EFeatureExactName[] values = values();
 

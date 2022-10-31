@@ -52,4 +52,18 @@ public class AdminController {
         return realtyService.fillHouseYearInfo(requestHelper);
     }
 
+    @GET
+    @Path("remapAllAdresses")
+    public String remapAllAdresses(RequestHelper requestHelper) {
+
+        try {
+            realtyService.remapAllAdresses(requestHelper);
+            return "success";
+        } catch (Exception ex) {
+            LOGGER.error("There is error: ", ex);
+
+            return "fail";
+        }
+    }
+
 }

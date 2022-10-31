@@ -23,6 +23,7 @@
         let standartPopup = cmpCore.findByName("standartPopup");
 
         let districtCombo = cmpCore.findByName("districtCombo");
+        let cityCombo = cmpCore.findByName("cityCombo");
 
         let districtId = districtCombo.getValue();
 
@@ -43,7 +44,7 @@
 
           let districtEditor = standartPopup.findByName("districtEditor");
 
-          districtEditor.init(standartPopup, ans);
+          districtEditor.init(standartPopup, ans, cityCombo.getRecord());
         });
 
         standartPopup.showDistrictEditor();

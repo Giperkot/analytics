@@ -7,8 +7,10 @@ import converter.realty.RealtyMapperImpl;
 import core.rest.RequestHelper;
 import dao.parser.ParserDao;
 import dao.realty.RealtyDao;
+import db.entity.parser.NoticeEntity;
 import db.entity.parser.view.VNoticeEntity;
 import db.entity.realty.*;
+import db.entity.realty.admin.AddrHouseEntity;
 import db.entity.realty.view.VNoticeInfoWithAvgPriceEntity;
 import dto.common.SimpleResultDto;
 import dto.geocode.CommonCoordsDto;
@@ -18,9 +20,11 @@ import dto.report.RealtyConfigurationDto;
 import dto.report.RequestReportDto;
 import enums.EDirectionName;
 import enums.realty.EStreetType;
+import enums.realty.EVillageType;
 import enums.report.*;
 import exceptions.NoCoordsInCityException;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.set.hash.TLongHashSet;
 import helper.report.ReportClassifier;
 import interfaces.report.ITitled;
 import org.slf4j.Logger;
@@ -60,8 +64,6 @@ public class RealtyService extends AbstractParser {
 
     private final RealtyMapper realtyMapper = new RealtyMapperImpl();
 
-    private static String CLEAN_STREET_REGEXP = EStreetType.createStringRegexp();
-
     private RealtyService() {
     }
 
@@ -75,6 +77,11 @@ public class RealtyService extends AbstractParser {
 
         for (int i = 0; i < districtEntityList.size(); i++) {
             DistrictEntity districtEntity = districtEntityList.get(i);
+
+            if (districtEntity.getParentDistrictId() != null && districtEntity.getParentDistrictId() == 1) {
+                continue;
+            }
+
             DistrictWrapper wrapper = DistrictWrapper.create(districtEntity);
 
             if (districtEntity.getCoords() == null || districtEntity.getCoords().length < 1) {
@@ -183,34 +190,87 @@ public class RealtyService extends AbstractParser {
         connection.commit();
     }
 
+    private String getHouseNumByIdx(String[] addrParts, int idx) {
+        String houseNum = addrParts[idx].trim();
+
+        int lastSpace = houseNum.lastIndexOf(" ");
+
+        if (lastSpace != -1) {
+            houseNum = houseNum.substring(lastSpace + 1);
+        }
+
+        return houseNum.toLowerCase();
+    }
+
+    private void fillStreet(EStreetType streetType, String addrPart, StreetDto streetDto) {
+        String street = streetType.getClearRegexp().matcher(addrPart)
+                                  .replaceAll("")
+                                  .replaceAll("[ ]{2,}", " ")
+                                  .replace('ё', 'е')
+                                  .trim();
+
+        streetDto.setName(street);
+        streetDto.setStreetType(streetType);
+    }
+
     public HouseDto getHouseAddr(String address, long noticeId) {
         address = address.trim();
 
-        String street = null;
+        // String street = null;
         String houseNum = null;
         int strtIdx = -1;
 
         String[] addrParts = address.split(",");
 
+        boolean haveStreet = false;
+        int lastVillageIdx = -1;
+        // boolean haveVillage = false;
+        VillageDto village = new VillageDto();
+        StreetDto streetDto = new StreetDto();
+
         for (int i = 0; i < addrParts.length; i++) {
-            if (addrParts[i].contains("ул.") || addrParts[i].contains("ул.")) {
-                street = addrParts[i].trim();
+
+            EVillageType villageType = EVillageType.getVillageType(addrParts[i]);
+
+            if (villageType != EVillageType.UNKNOWN) {
+                String villageStr = villageType.getClearRegexp().matcher(addrParts[i])
+                                               .replaceAll("")
+                                               .replaceAll("[ ]{2,}", " ")
+                                               .replace('ё', 'е')
+                                               .trim();
+
+                if (i == addrParts.length - 1 && villageType == EVillageType.THE_VILLAGE) {
+                    continue;
+                }
+
+                village.setName(villageStr);
+                village.setVillageType(villageType);
+                lastVillageIdx = i;
+                continue;
+            }
+
+            EStreetType streetType = EStreetType.getStreetType(addrParts[i]);
+            if (streetType != EStreetType.UNKNOWN) {
+                fillStreet(streetType, addrParts[i], streetDto);
+                // haveStreet = true;
+
                 strtIdx = i;
-                break;
+                continue;
             }
+
         }
 
-        if (street != null && strtIdx < addrParts.length - 1) {
-            houseNum = addrParts[strtIdx + 1].trim();
-
-            int lastSpace = houseNum.lastIndexOf(" ");
-
-            if (lastSpace != -1) {
-                houseNum = houseNum.substring(lastSpace + 1);
-            }
+        if (!streetDto.exists() && lastVillageIdx == addrParts.length - 2) {
+            houseNum = getHouseNumByIdx(addrParts, lastVillageIdx + 1);
         }
 
-        if (CommonUtils.isNullOrEmpty(street) || CommonUtils.isNullOrEmpty(houseNum)) {
+        if (streetDto.exists() && strtIdx < addrParts.length - 1) {
+            houseNum = getHouseNumByIdx(addrParts, strtIdx + 1);
+        }
+
+        if (lastVillageIdx != addrParts.length - 1 &&
+                (!streetDto.exists() && lastVillageIdx < addrParts.length - 2
+                || CommonUtils.isNullOrEmpty(houseNum) && (!(streetDto.exists() && strtIdx == addrParts.length - 1)))) {
             // Старый способ
             int lastSpace = address.lastIndexOf(" ");
             int lastComma = address.lastIndexOf(",");
@@ -224,27 +284,25 @@ public class RealtyService extends AbstractParser {
                 throw new RuntimeException("Адрес записан в неверном формате: " + address + ". noticeId: " + noticeId);
             }
 
-            houseNum = address.substring(lastSpace + 1).trim();
+            houseNum = address.substring(lastSpace + 1).trim().toLowerCase();
             // ул. Малкова ш. Космонавтов
-
+            String street;
             if (preLastComma > 0) {
                 street = address.substring(preLastComma + 1, lastComma);
             } else {
                 street = address.substring(0, lastComma);
             }
+
+            EStreetType streetType = EStreetType.getStreetType(street);
+
+            if (streetType == EStreetType.UNKNOWN) {
+                streetType = EStreetType.STREET;
+            }
+
+            fillStreet(streetType, street, streetDto);
         }
 
-        EStreetType streetType = EStreetType.getStreetType(street);
-
-        // "ул\\.|улица|ш\\.|б-р|пр-т|пр\\.|аллея|шоссе|микрорайон|пер."
-        street = street.replaceAll(CLEAN_STREET_REGEXP, "")
-                       .replaceAll("[ ]{2,}", " ").trim();
-
-        if (street.contains("ё")) {
-            street = street.replace('ё', 'е');
-        }
-
-        return new HouseDto(street, streetType, houseNum);
+        return new HouseDto(village, streetDto, houseNum);
     }
 
     private void determineAddress(Connection connection, VNoticeEntity noticeEntity, IGeocoder forcedGeoRepo) {
@@ -256,21 +314,33 @@ public class RealtyService extends AbstractParser {
         }
 
         HouseDto houseDto = getHouseAddr(address, noticeEntity.getId());
-        String street = houseDto.getStreet();
+        StreetDto street = houseDto.getStreet();
         String houseNum = houseDto.getHouseNum();
-        EStreetType streetType = houseDto.getStreetType();
-
-        CityEntity cityEntity = realtyDao.getCityById(connection, noticeEntity.getCityId());
+        // EStreetType streetType = houseDto.getStreet().getStreetType();
 
         try {
+            if (!street.exists() && !houseDto.getVillage().exists()) {
+                if (!address.contains(noticeEntity.getCityName())) {
+                    saveEmptyAddress(connection, noticeEntity);
+                    return;
+                }
+
+                throw new IllegalArgumentException("Тип улицы не найден.");
+            }
+
+            CityEntity cityEntity = realtyDao.getCityById(connection, noticeEntity.getCityId());
+
+            // Получение деревни или улицы.
+            // long fiasAddr = findAddrFromFias(connection, cityEntity.getFiasId(), houseDto.getVillage(), houseDto.getStreet());
+
             // Проверить, есть ли адрес в БД.
-            HouseEntity houseEntity = realtyDao.getHouseByAddress(connection, street, streetType, houseNum, cityEntity);
+            HouseEntity houseEntity = realtyDao.getHouseByAddress(connection, houseDto.printStreetAddr(), houseNum, cityEntity);
 
             if (houseEntity == null) {
 
-                long fiasStreet = realtyDao.findFiasStreet(connection, cityEntity.getFiasId(), street, streetType);
+                // long fiasStreet = realtyDao.findFiasStreet(connection, cityEntity.getFiasId(), street, streetType);
 
-                if (fiasStreet < 0) {
+                /*if (fiasAddr < 0) {
                     if (!address.contains(cityEntity.getName())) {
                         // Это нормально. Нужно пропустить.
                         saveEmptyAddress(connection, noticeEntity);
@@ -278,12 +348,19 @@ public class RealtyService extends AbstractParser {
                     }
 
                     throw new RuntimeException("Улица не найдена");
+                }*/
+
+                if (!houseDto.getStreet().exists() && CommonUtils.isNullOrEmpty(houseDto.getHouseNum())
+                    || houseDto.getStreet().getStreetType() == EStreetType.LINE && CommonUtils.isNullOrEmpty(houseDto.getHouseNum())) {
+                    // Это не анализируемый объект.
+                    saveEmptyAddress(connection, noticeEntity);
+                    return;
                 }
 
                 // Сейчас нужно получить координаты по адресу.
                 List<CommonCoordsDto> rawCoordinatesDto = (forcedGeoRepo == null) ? geocodeHttpRepository
-                        .getHouseByAddress(noticeEntity.getCityName(), street, streetType, houseNum)
-                        : forcedGeoRepo.getHouseByAddress(noticeEntity.getCityName(), street, streetType, houseNum);
+                        .getHouseByAddress(noticeEntity.getCityName(), houseDto, address)
+                        : forcedGeoRepo.getHouseByAddress(noticeEntity.getCityName(), houseDto, address);
 
                 if (CommonUtils.isNullOrEmpty(rawCoordinatesDto)) {
                     if (!address.contains(noticeEntity.getCityName())) {
@@ -304,10 +381,10 @@ public class RealtyService extends AbstractParser {
                 }
 
                 if (coordinatesDto.isEmpty()) {
-                    if (!address.contains(noticeEntity.getCityName()) || streetType == EStreetType.CITY) {
+                    /*if (!address.contains(noticeEntity.getCityName()) || streetType == EStreetType.CITY) {
                         saveEmptyAddress(connection, noticeEntity);
                         return;
-                    }
+                    }*/
 
                     throw new NoCoordsInCityException("Найденный адрес не входит в " + noticeEntity.getCityName() + ". noticeId: " + noticeEntity.getId() + ". "
                                                        + noticeEntity.getCityName() + " " + street + " " + houseNum);
@@ -332,10 +409,10 @@ public class RealtyService extends AbstractParser {
                 houseEntity = new HouseEntity();
                 houseEntity.setHouseNum(houseNum);
                 houseEntity.setCityId(noticeEntity.getCityId());
-                houseEntity.setStreet(street);
+                houseEntity.setStreet(houseDto.printStreetAddr());
                 houseEntity.setDistrictId(houseDistrict.getId());
                 houseEntity.setCoords(houseCoords);
-                houseEntity.setFiasStreet(fiasStreet);
+                // houseEntity.setFiasStreet(fiasAddr);
 
                 if (houseEntity.getId() != -1) {
                     // Сохранить новый дом в БД.
@@ -357,6 +434,30 @@ public class RealtyService extends AbstractParser {
 
             determineAddress(connection, noticeEntity, YandexHttpRepository.getInstance());
         }
+    }
+
+    private long findAddrFromFias(Connection connection, long cityFiasId, VillageDto village, StreetDto street) {
+
+        long villageId = -1;
+
+        if (village.exists()) {
+            villageId = realtyDao.findFiasVillage(connection, cityFiasId, village.getName(), village.getVillageType());
+        }
+
+        if (villageId < 0 && !street.exists()) {
+            return -1;
+        }
+
+        if (villageId > 0 && !street.exists()) {
+            return villageId;
+        }
+
+        if (villageId < 0) {
+            return realtyDao.findFiasStreet(connection, cityFiasId, street.getName(), street.getStreetType());
+        }
+
+        return realtyDao.findFiasStreet(connection, cityFiasId, street.getName(), street.getStreetType(), villageId);
+
     }
 
     private boolean isPointInCity(CommonCoordsDto commonCoordsDto, CityEntity cityEntity) {
@@ -636,6 +737,43 @@ public class RealtyService extends AbstractParser {
 
 
 
+    }
+
+    public void remapAllAdresses(RequestHelper requestHelper) {
+        Connection connection = requestHelper.getConnection();
+        List<AddrHouseEntity> houseEntityList = realtyDao.noticesWithHouse(connection);
+        List<AddrHouseEntity> newAddrs = new ArrayList<>();
+
+        LOGGER.info("Start to prepare addresses");
+
+        TLongHashSet houseSet = new TLongHashSet();
+
+        for (AddrHouseEntity houseEntity : houseEntityList) {
+
+            if (houseSet.contains(houseEntity.getId())) {
+                continue;
+            }
+
+            HouseDto houseDto = getHouseAddr(houseEntity.getNoticeAddr(), houseEntity.getId());
+
+            houseEntity.setStreet(houseDto.printStreetAddr());
+            houseEntity.setHouseNum(houseDto.getHouseNum());
+
+            newAddrs.add(houseEntity);
+
+            houseSet.add(houseEntity.getId());
+        }
+
+        LOGGER.info("Addresses is ready to save");
+
+        realtyDao.updateHouseAddress(connection, newAddrs);
+
+        try {
+            connection.commit();
+        } catch (SQLException exception) {
+            LOGGER.error("", exception);
+            throw new RuntimeException("", exception);
+        }
     }
 
 }

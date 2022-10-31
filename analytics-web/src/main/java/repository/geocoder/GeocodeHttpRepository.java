@@ -1,6 +1,7 @@
 package repository.geocoder;
 
 import dto.geocode.CommonCoordsDto;
+import dto.realty.HouseDto;
 import enums.realty.EStreetType;
 import exceptions.YandexBadRequestException;
 import org.slf4j.Logger;
@@ -29,9 +30,9 @@ public class GeocodeHttpRepository implements IGeocoder{
     private boolean yandexAlive = true;
 
     @Override
-    public List<CommonCoordsDto> getHouseByAddress(String cityName, String street, EStreetType streetType, String houseNum) {
+    public List<CommonCoordsDto> getHouseByAddress(String cityName, HouseDto houseDto, String originalAddr) {
 
-        List<CommonCoordsDto> result = nominationHttpRepository.getHouseByAddress(cityName, street, streetType, houseNum);
+        List<CommonCoordsDto> result = nominationHttpRepository.getHouseByAddress(cityName, houseDto, originalAddr);
 
         if (!result.isEmpty()) {
             return result;
@@ -39,7 +40,7 @@ public class GeocodeHttpRepository implements IGeocoder{
 
         if (yandexAlive) {
             try {
-                return yandexHttpRepository.getHouseByAddress(cityName, street, streetType, houseNum);
+                return yandexHttpRepository.getHouseByAddress(cityName, houseDto, originalAddr);
             } catch (YandexBadRequestException ex) {
                 LOGGER.error("Геокодеру яндекса стало плохо. Истёк ключ.");
                 yandexAlive = false;

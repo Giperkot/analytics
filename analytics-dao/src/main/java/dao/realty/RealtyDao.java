@@ -11,9 +11,11 @@ import db.entity.realty.HouseEntity;
 import db.entity.realty.NoticeAveragePriceEntity;
 import db.entity.realty.NoticeCategoryEntity;
 import db.entity.realty.ShortDistrictEntity;
+import db.entity.realty.admin.AddrHouseEntity;
 import db.entity.realty.view.VNoticeInfoWithAvgPriceEntity;
 import enums.EDirectionName;
 import enums.realty.EStreetType;
+import enums.realty.EVillageType;
 import enums.report.EBalconParam;
 import enums.report.EFloor;
 import enums.report.EHouseBuildYear;
@@ -31,6 +33,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
+import java.util.Locale;
 
 public class RealtyDao extends AbstractDao {
 
@@ -78,14 +81,38 @@ public class RealtyDao extends AbstractDao {
         }
     }
 
-    public long findFiasStreet(Connection connection, long fiasCityId, String street, EStreetType streetType) {
+    public long findFiasVillage(Connection connection, long fiasCityId, String village, EVillageType villageType) {
         String sql = "select id from realty.fias_addr fa"
-                + " where fa.city_id = ? and (fa.off_name = ? or fa.formal_name = ?) and fa.shortname = ?";
+                + " where fa.city_id = ? and (lower(fa.off_name) = ? or lower(fa.formal_name) = ?) and fa.shortname = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            String villageLower = village.toLowerCase();
             statement.setLong(1, fiasCityId);
-            statement.setString(2, street);
-            statement.setString(3, street);
+            statement.setString(2, villageLower);
+            statement.setString(3, villageLower);
+            statement.setString(4, villageType.getFiasShortName());
+
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getLong("id");
+            }
+
+            return -1;
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public long findFiasStreet(Connection connection, long fiasCityId, String street, EStreetType streetType) {
+        String sql = "select id from realty.fias_addr fa"
+                + " where fa.city_id = ? and (lower(fa.off_name) = ? or lower(fa.formal_name) = ?) and fa.shortname = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            String lowerStreet = street.toLowerCase();
+            statement.setLong(1, fiasCityId);
+            statement.setString(2, lowerStreet);
+            statement.setString(3, lowerStreet);
             statement.setString(4, streetType.getFiasShortName());
 
             ResultSet resultSet = statement.executeQuery();
@@ -100,19 +127,47 @@ public class RealtyDao extends AbstractDao {
         }
     }
 
-    public HouseEntity getHouseByAddress(Connection connection, String street, EStreetType streetType, String houseNum, CityEntity cityEntity) {
+    public long findFiasStreet(Connection connection, long fiasCityId, String street, EStreetType streetType, long parentId) {
+        String sql = "with recursive street_info as (\n"
+                + "    select id, fias_uuid, off_name, formal_name, shortname, city_id from realty.fias_addr where id = ? "
+                + "    union\n"
+                + "    select child.id, child.fias_uuid, child.off_name, child.formal_name, child.shortname, child.city_id from realty.fias_addr child\n"
+                + "        join street_info si on si.fias_uuid = child.parent_uuid\n"
+                + ")\n"
+                + "select id from street_info where city_id = ? and shortname = ? and (lower(formal_name) = ? or lower(off_name) = ?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            String lowerStreet = street.toLowerCase();
+            statement.setLong(1, parentId);
+            statement.setLong(2, fiasCityId);
+            statement.setString(3, streetType.getFiasShortName());
+            statement.setString(4, lowerStreet);
+            statement.setString(5, lowerStreet);
+
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getLong("id");
+            }
+
+            return -1;
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public HouseEntity getHouseByAddress(Connection connection, String streetAddr, String houseNum, CityEntity cityEntity) {
 
         String sql = "select h.* from realty.house h "
                 + "    join realty.fias_addr fa on h.fias_street = fa.id "
-                + "where h.house_num = ? and h.city_id = ? and (fa.off_name = ? or fa.formal_name = ?) and fa.city_id = ? and fa.shortname = ?";
+                + "where h.house_num = ? and h.city_id = ? and h.street = ?";
+
+        String houseNumFinal = (houseNum != null) ? houseNum : "-";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, houseNum);
+            statement.setString(1, houseNumFinal);
             statement.setLong(2, cityEntity.getId());
-            statement.setString(3, street);
-            statement.setString(4, street);
-            statement.setLong(5, cityEntity.getFiasId());
-            statement.setString(6, streetType.getFiasShortName());
+            statement.setString(3, streetAddr);
 
             ResultSet resultSet = statement.executeQuery();
 
@@ -205,9 +260,11 @@ public class RealtyDao extends AbstractDao {
         String sql = "insert into realty.house (street, house_num, district_id, city_id, coords, fias_street) "
                 + " values (?, ?, ?, ?, ? :: jsonb, ?) returning id";
 
+        String houseNum = (houseEntity.getHouseNum() != null) ? houseEntity.getHouseNum() : "-";
+
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, houseEntity.getStreet());
-            statement.setString(2, houseEntity.getHouseNum());
+            statement.setString(2, houseNum);
             statement.setLong(3, houseEntity.getDistrictId());
             statement.setLong(4, houseEntity.getCityId());
             statement.setString(5, objectMapper.writeValueAsString(houseEntity.getCoords()));
@@ -535,6 +592,39 @@ public class RealtyDao extends AbstractDao {
             statement.setString(5, entity.getHouseType().getName());
 
             statement.executeUpdate();
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public List<AddrHouseEntity> noticesWithHouse(Connection connection) {
+        String sql = "select h.*, n.address as notice_addr from realty.house h join parser.notice n on n.house_id = h.id";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            ResultSet resultSet = statement.executeQuery();
+
+            return mappingMultipleResult(resultSet, AddrHouseEntity.class);
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public void updateHouseAddress(Connection connection, List<? extends HouseEntity> houseList) {
+        String sql = "update realty.house set street = ?, house_num = ? where id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            for (HouseEntity houseEntity : houseList) {
+
+                String houseNumFinal = (houseEntity.getHouseNum() != null) ? houseEntity.getHouseNum() : "-";
+
+                statement.setString(1, houseEntity.getStreet());
+                statement.setString(2, houseEntity.getHouseNum());
+                statement.setLong(3, houseEntity.getId());
+
+                statement.addBatch();
+            }
+
+            statement.executeBatch();
         } catch (SQLException ex) {
             throw new RuntimeException(ex);
         }

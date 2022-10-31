@@ -160,7 +160,7 @@ function generateFiles(data) {
 
     console.log("generateFiles: " + data.fileName);
 
-    console.log(filePathList);
+    // console.log(filePathList);
 
     if (filePathList.length < 1) {
         // создать пустой файл.

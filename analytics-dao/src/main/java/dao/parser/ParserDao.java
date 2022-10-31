@@ -12,6 +12,7 @@ import db.entity.parser.action.NoticeFeatureActionEntity;
 import db.entity.parser.view.VDistrictNoticeEntity;
 import db.entity.parser.view.VFeatureValueEntity;
 import db.entity.parser.view.VParserNoticeEntity;
+import db.entity.realty.admin.AddrHouseEntity;
 import dto.parser.FeatureComplexValue;
 import dto.parser.FeatureDto;
 import enums.EDirectionName;

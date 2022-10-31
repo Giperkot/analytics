@@ -7,7 +7,7 @@
         this.temp.map = null;
         this.temp.district = null;
       },
-      init: function (standartPopup, districtInfo) {
+      init: function (standartPopup, districtInfo, cityInfo) {
         let self = this;
         let nameTextfield = standartPopup.findByName("districtNameField");
         let districtParentCombo = standartPopup.findByName("districtParentCombo");
@@ -32,7 +32,7 @@
         }
 
         setTimeout(function () {
-          self.loadMap(districtInfo.coords);
+          self.loadMap(districtInfo.coords, cityInfo.latitude, cityInfo.longitude);
         }, timeout);
       },
       mappingPoligon: function(arrayOfPoints) {
@@ -112,7 +112,7 @@
 
         return this.mappingMultiPoligon(coords);
       },
-      loadMap: function (coords) {
+      loadMap: function (coords, latitude, longitude) {
 
         if (this.temp.map) {
           this.temp.map.container.fitToViewport()
@@ -121,7 +121,8 @@
         let districtMap = document.getElementById("district_map");
 
         var myMap = new ymaps.Map(districtMap, {
-          center: [58.011929, 56.242579],
+          center: [latitude, longitude],
+          // center: [58.011929, 56.242579],
           zoom: 10,
           controls: ['default', 'routeButtonControl']
         });

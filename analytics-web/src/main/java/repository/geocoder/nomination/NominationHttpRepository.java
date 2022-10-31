@@ -2,6 +2,7 @@ package repository.geocoder.nomination;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import common.CommonUtils;
 import consts.ProjectConst;
 import dto.geocode.CommonCoordsDto;
 import dto.geocode.nomination.NominationCoordinatesDto;
@@ -11,6 +12,9 @@ import dto.geocode.yandex.GeoObjectCollection;
 import dto.realty.BoundsDto;
 import dto.realty.CoordPoint;
 import dto.realty.HouseCoords;
+import dto.realty.HouseDto;
+import dto.realty.StreetDto;
+import dto.realty.VillageDto;
 import enums.realty.EStreetType;
 import repository.geocoder.IGeocoder;
 
@@ -47,10 +51,13 @@ public class NominationHttpRepository implements IGeocoder {
     private final HttpClient client;
 
     @Override
-    public List<CommonCoordsDto> getHouseByAddress(String cityName, String street, EStreetType streetType, String houseNum) {
+    public List<CommonCoordsDto> getHouseByAddress(String cityName, HouseDto houseDto, String originalAddr) {
         try {
+
+            String query = createQuery(cityName, houseDto);
+
             String url = "https://nominatim.openstreetmap.org/search.php?q=" +
-                    URLEncoder.encode(cityName + " " + street + " " + houseNum, StandardCharsets.UTF_8) + "&format=jsonv2" +
+                    URLEncoder.encode(query, StandardCharsets.UTF_8) + "&format=jsonv2" +
                     "&city=" + cityName +"&limit=50";
 
             HttpRequest.Builder builder = HttpRequest
@@ -64,12 +71,18 @@ public class NominationHttpRepository implements IGeocoder {
 
             List<CommonCoordsDto> result = new ArrayList<>();
 
+            StreetDto streetDto = houseDto.getStreet();
+            VillageDto villageDto = houseDto.getVillage();
+
             for (NominationCoordinatesDto nominationCoordinatesDto : nominationCoordinatesArr) {
-                if (!"building".equals(nominationCoordinatesDto.getCategory())) {
+                if (!"building".equals(nominationCoordinatesDto.getCategory())
+                    && !"construction".equals(nominationCoordinatesDto.getCategory())) {
                     continue;
                 }
 
-                if (!containsStreetType(nominationCoordinatesDto.getDisplayName(), streetType)) {
+                if (streetDto.getStreetType() != null && !streetDto.getStreetType().containsStreetType(nominationCoordinatesDto.getDisplayName())
+                        && !nominationCoordinatesDto.getDisplayName().contains(streetDto.getName())
+                    || !nominationCoordinatesDto.getDisplayName().contains(cityName)) {
                     continue;
                 }
 

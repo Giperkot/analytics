@@ -344,6 +344,8 @@ create table parser.direction_url (
 alter table parser.parse_task
     add column direction_url_id bigint references parser.direction_url(id) not null default 1;
 
+alter table parser.direction_url
+    add column title varchar(255);
 
 create table realty.notice_category (
     id bigserial not null primary key,
@@ -429,6 +431,13 @@ alter table realty.fias_addr
 
 alter table realty.city
     add column fias_id bigint references realty.fias_addr(id);
+
+create unique index fias_addr_fias_uuid_uindex
+	on realty.fias_addr (fias_uuid);
+alter table realty.fias_addr
+    add constraint fias_addr_fias_addr_fias_uuid_fk
+        foreign key (parent_uuid) references realty.fias_addr (fias_uuid);
+
 
 -- Этот запрос может падать...
 alter table realty.city

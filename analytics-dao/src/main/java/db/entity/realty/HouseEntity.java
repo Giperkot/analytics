@@ -39,6 +39,10 @@ public class HouseEntity extends BaseEntity {
     }
 
     public String getHouseNum() {
+        if ("-".equals(houseNum)) {
+            return null;
+        }
+
         return houseNum;
     }
 

@@ -4,23 +4,54 @@ import enums.realty.EStreetType;
 
 public class HouseDto {
 
-    private String street;
+    private VillageDto village;
+
+    private StreetDto street;
 
     private String houseNum;
 
-    private EStreetType streetType;
-
-    public HouseDto(String street, EStreetType streetType, String houseNum) {
+    public HouseDto(VillageDto village, StreetDto street, String houseNum) {
+        this.village = village;
         this.street = street;
-        this.streetType = streetType;
         this.houseNum = houseNum;
     }
 
-    public String getStreet() {
+    public String printStreetAddr() {
+        StringBuilder sb = new StringBuilder();
+        boolean streetExists = street.exists();
+
+        if (village.exists()) {
+            sb.append(village.getVillageType().getCanonShortName() + " " + village.getName());
+
+            if (streetExists) {
+                sb.append(", ");
+            }
+        }
+
+        if (streetExists) {
+            sb.append(street.getStreetType().getCanonShortName() + " " + street.getName());
+        }
+
+        return sb.toString();
+    }
+
+    public String printFullAddr() {
+        return printStreetAddr() + ", " + houseNum;
+    }
+
+    public VillageDto getVillage() {
+        return village;
+    }
+
+    public void setVillage(VillageDto village) {
+        this.village = village;
+    }
+
+    public StreetDto getStreet() {
         return street;
     }
 
-    public void setStreet(String street) {
+    public void setStreet(StreetDto street) {
         this.street = street;
     }
 
@@ -30,13 +61,5 @@ public class HouseDto {
 
     public void setHouseNum(String houseNum) {
         this.houseNum = houseNum;
-    }
-
-    public EStreetType getStreetType() {
-        return streetType;
-    }
-
-    public void setStreetType(EStreetType streetType) {
-        this.streetType = streetType;
     }
 }
