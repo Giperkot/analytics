@@ -45,6 +45,9 @@
             case "reports":
               toPage = "reports";
               break;
+            case "import":
+              toPage = "import";
+              break;
             case "analytics":
             default:
               toPage = this.properties.defaultPage;
@@ -332,6 +335,20 @@
               methods: {
 
               }
+            }
+          ]
+        }, {
+          name: "import",
+          type: "CRealtyImport",
+          container: ".page_switcher",
+          properties: {
+            hidden: true
+          },
+          children: [
+            {
+              name: "realtyImportUploader",
+              type: "CFileUploader",
+              container: ".realty_import_uploader"
             }
           ]
         }, {

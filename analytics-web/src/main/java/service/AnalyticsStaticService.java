@@ -5,24 +5,10 @@ import dto.static_dto.CabinetDto;
 import dto.static_dto.EnterDto;
 import dto.static_dto.MainCabinetDto;
 import dto.static_dto.MainPageInfoDto;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.net.MalformedURLException;
 
 public class AnalyticsStaticService extends StaticService {
 
@@ -74,6 +60,7 @@ public class AnalyticsStaticService extends StaticService {
                 enterDto.setRegister("success".equals(requestHelper.getHttpServletRequest().getParameter("register")));
                 break;
             case "reports":
+            case "import":
             case "realtySearch":
             case "analytics":
             // case "realty":
