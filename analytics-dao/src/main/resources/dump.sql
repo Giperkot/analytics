@@ -500,3 +500,18 @@ create or replace view realty.v_notice_info_with_avg_price as(
         n.status = 'ACTIVE'
     order by h.district_id
 );
+
+create table realty.excel_data_temp(
+    id bigserial not null primary key,
+    location varchar(1000)  not null,
+    rooms numeric  not null,
+    building_type varchar(20) not null,
+    floors_in_building numeric  not null,
+    walls_material varchar(10) not null,
+    floor numeric,
+    apartment_area numeric,
+    kitchen_area numeric,
+    balcony boolean,
+    distance_to_metro numeric,
+    condition varchar(25)
+);
