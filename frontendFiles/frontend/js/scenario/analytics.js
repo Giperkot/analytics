@@ -348,7 +348,32 @@
             {
               name: "realtyImportUploader",
               type: "CFileUploader",
-              container: ".realty_import_uploader"
+              container: ".realty_import_uploader",
+              methods: {
+
+              },
+              events: {
+                onLoadFile: function () {
+                  var fileUploader = cmpCore.findByName("realtyImportUploader");
+
+                  let formData = fileUploader.getFormData();
+
+                  helper.getHttpPromise({
+                    method: "POST",
+                    url: "/api/import/readExcel",
+                    multipartData: formData
+                  }).then(function (response) {
+                    var ans = JSON.parse(response);
+
+                    console.log(ans);
+
+                    /*documentResultTable.setGridData(ans);
+                    documentResultTable.render(documentResultTable.rootElm.containerElm);
+                    documentResultTable.bind();*/
+                  });
+
+                }
+              }
             }
           ]
         }, {

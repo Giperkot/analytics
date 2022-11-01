@@ -2,16 +2,13 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import core.AnalyticsContext;
 import dto.geocode.yandex.CoordinatesDto;
 import dto.realty.HouseDto;
-import enums.realty.EStreetType;
 import org.junit.Test;
 import service.realty.RealtyService;
 
 import javax.servlet.ServletContextEvent;
-
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class AddressTest {
 
@@ -97,6 +94,10 @@ public class AddressTest {
         houseDto = realtyService.getHouseAddr("Москва, Новомосковский административный округ, поселение Московский, жилой комплекс Филатов Луг, ул. Картмазовские Пруды, 2к2", -1);
         // Москва, Новомосковский административный округ, поселение Московский, жилой комплекс Филатов Луг, ул. Картмазовские Пруды, 2к2
         System.out.println(houseDto.printFullAddr());
+
+        // Москва, Зеленоград, к2032, этаж 2
+
+
     }
 
     public static void main(String[] args) throws IOException {

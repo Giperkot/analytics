@@ -1,7 +1,6 @@
 package repository.geocoder.yandex;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import common.CommonUtils;
 import converter.realty.RealtyConverter;
 import core.AnalyticsContext;
 import dto.geocode.CommonCoordsDto;
@@ -10,7 +9,6 @@ import dto.geocode.yandex.FeatureMember;
 import dto.realty.HouseCoords;
 import dto.realty.HouseDto;
 import dto.realty.StreetDto;
-import enums.realty.EStreetType;
 import exceptions.YandexBadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +65,9 @@ public class YandexHttpRepository implements IGeocoder {
                 throw new YandexBadRequestException();
             }
 
-            CoordinatesDto coordinatesDto = mapper.readValue(response.body(), CoordinatesDto.class);
+            String responseBody = response.body().replace("<fix>", "").replace("</fix>", "");
+
+            CoordinatesDto coordinatesDto = mapper.readValue(responseBody, CoordinatesDto.class);
 
             List<FeatureMember> featureMemberList = coordinatesDto.getGeoObjectCollection().getFeatureMemberList();
             List<CommonCoordsDto> result = new ArrayList<>();
@@ -95,7 +95,7 @@ public class YandexHttpRepository implements IGeocoder {
         } catch (YandexBadRequestException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new RuntimeException("Ошибка при определении координат дома.", ex);
+            throw new RuntimeException("Ошибка при определении координат дома. " + houseDto.printFullAddr() , ex);
         }
     }
 }

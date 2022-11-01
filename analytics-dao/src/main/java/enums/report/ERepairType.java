@@ -4,16 +4,13 @@ import db.annotations.EnumMethodDataBase;
 import interfaces.report.ITitled;
 
 @EnumMethodDataBase(fromDbName = "fromString")
-public enum EHouseType implements ITitled {
+public enum ERepairType implements ITitled {
     UNKNOWN(0, "UNKNOWN", "Неизвестно"),
-    BRICK(1, "BRICK", "Кирпичный"),
-    MONOLIT(2, "MONOLIT", "Монолитный"),
-    PANEL(3, "PANEL", "Панельный"),
-    BLOCK(4, "BLOCK", "Блочный"),
-    BRICK_MONOLIT(5, "BRICK_MONOLIT", "Монолитно-кирпичный"),
-    WOOD(6, "WOOD", "Деревянный");
+    NONE(1, "NONE", "Без отделки"),
+    BAD(2, "BAD", "Муниципальный ремонт"),
+    GOOD(3, "GOOD", "Современная отделка");
 
-    private static EHouseType[] values = values();
+    private static ERepairType[] values = values();
 
     private final int id;
 
@@ -21,14 +18,14 @@ public enum EHouseType implements ITitled {
 
     private final String title;
 
-    EHouseType(int id, String name, String title) {
+    ERepairType(int id, String name, String title) {
         this.id = id;
         this.name = name;
         this.title = title;
     }
 
-    public static EHouseType fromString (String value) {
-        for (EHouseType val : values) {
+    public static ERepairType fromString(String value) {
+        for (ERepairType val : values) {
             if (val.name.equals(value)) {
                 return val;
             }
@@ -50,8 +47,8 @@ public enum EHouseType implements ITitled {
         return name;
     }
 
-    public static EHouseType getByOrdinal(int ordinal) {
-        for (EHouseType value : values) {
+    public static ERepairType getByOrdinal(int ordinal) {
+        for (ERepairType value : values) {
             if (value.id == ordinal) {
                 return value;
             }
@@ -60,7 +57,20 @@ public enum EHouseType implements ITitled {
         throw new RuntimeException("Нет такого id");
     }
 
-    public static EHouseType[] getValues() {
+    public static ERepairType getByTitle(String value) {
+
+        String lower = value.toLowerCase().strip();
+
+        for (ERepairType val : values) {
+            if (val.title.toLowerCase().equals(lower)) {
+                return val;
+            }
+        }
+
+        throw new IllegalArgumentException("Значение не найдено " + value);
+    }
+
+    public static ERepairType[] getValues() {
         return values;
     }
 }

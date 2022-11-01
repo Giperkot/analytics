@@ -6,8 +6,8 @@ import interfaces.report.ITitled;
 @EnumMethodDataBase(fromDbName = "fromString")
 public enum EBalconParam implements ITitled {
 
-    FALSE(0, "Отсутствует", "FALSE"),
-    TRUE(1, "Присутствует", "TRUE");
+    FALSE(0, "Нет", "FALSE"),
+    TRUE(1, "Да", "TRUE");
 
     private static EBalconParam[] values = values();
 
@@ -36,6 +36,19 @@ public enum EBalconParam implements ITitled {
     public static EBalconParam fromString (String value) {
         for (EBalconParam val : values()) {
             if (val.name.equals(value)) {
+                return val;
+            }
+        }
+
+        throw new IllegalArgumentException("Значение не найдено " + value);
+    }
+
+    public static EBalconParam getByTitle(String value) {
+
+        String lower = value.toLowerCase().strip();
+
+        for (EBalconParam val : values) {
+            if (val.title.toLowerCase().equals(lower)) {
                 return val;
             }
         }

@@ -7,9 +7,13 @@ import converter.realty.RealtyMapperImpl;
 import core.rest.RequestHelper;
 import dao.parser.ParserDao;
 import dao.realty.RealtyDao;
-import db.entity.parser.NoticeEntity;
 import db.entity.parser.view.VNoticeEntity;
-import db.entity.realty.*;
+import db.entity.realty.CityEntity;
+import db.entity.realty.DistrictEntity;
+import db.entity.realty.HouseAddInfoEntity;
+import db.entity.realty.HouseEntity;
+import db.entity.realty.NoticeCategoryEntity;
+import db.entity.realty.ShortDistrictEntity;
 import db.entity.realty.admin.AddrHouseEntity;
 import db.entity.realty.view.VNoticeInfoWithAvgPriceEntity;
 import dto.common.SimpleResultDto;
@@ -21,7 +25,13 @@ import dto.report.RequestReportDto;
 import enums.EDirectionName;
 import enums.realty.EStreetType;
 import enums.realty.EVillageType;
-import enums.report.*;
+import enums.report.EBalconParam;
+import enums.report.EFloor;
+import enums.report.EHouseBuildYear;
+import enums.report.EHouseFloor;
+import enums.report.EHouseType;
+import enums.report.ERealtyConfigType;
+import enums.report.ERoomsCount;
 import exceptions.NoCoordsInCityException;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.hash.TLongHashSet;
@@ -387,7 +397,7 @@ public class RealtyService extends AbstractParser {
                     }*/
 
                     throw new NoCoordsInCityException("Найденный адрес не входит в " + noticeEntity.getCityName() + ". noticeId: " + noticeEntity.getId() + ". "
-                                                       + noticeEntity.getCityName() + " " + street + " " + houseNum);
+                                                       + noticeEntity.getCityName() + " " + houseDto.printFullAddr());
                 }
 
                 HouseCoords houseCoords = coordinatesDto.get(0).getHouseCoords();

@@ -163,23 +163,15 @@
                     }
 
                     this.refreshFileList();
+
+                    if (this.events.onLoadFile) {
+                        this.events.onLoadFile();
+                    }
                 }
             }
         },
         afterRender: function () {
-            var self = this;
 
-            /*self.containerElm.querySelector(".file_uploader_wrapper").addEventListener("drop", function (evt) {
-                console.log("drop");
-                evt.preventDefault();
-                evt.stopPropagation();
-            }, false);*/
-
-            /*self.containerElm.querySelector(".file_uploader_wrapper").addEventListener("dragdrop", function (evt) {
-                console.log("dragdrop");
-                evt.preventDefault();
-                evt.stopPropagation();
-            }, true);*/
         }
     });
 })();

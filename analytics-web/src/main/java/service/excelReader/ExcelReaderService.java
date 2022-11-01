@@ -1,5 +1,17 @@
 package service.excelReader;
 
+import converter.realty.ImportMapper;
+import converter.realty.ImportMapperImpl;
+import core.rest.RequestHelper;
+import dao.realty.excelimport.ImportRealtyDao;
+import db.entity.realty.excelimport.ImportRealtyObjectEntity;
+import db.entity.realty.excelimport.ImportRealtyRequestEntity;
+import dto.realty.excelimport.ImportExcelRealtyDto;
+import dto.realty.excelimport.ImportResponseDto;
+import enums.report.EBalconParam;
+import enums.report.ERealtySegment;
+import enums.report.ERepairType;
+import enums.report.ESimpleHouseType;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.CellType;
@@ -7,89 +19,169 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
+import javax.servlet.http.Part;
 import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ExcelReaderService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExcelReaderService.class);
+
     private static final ExcelReaderService instance = new ExcelReaderService();
 
     public static ExcelReaderService getInstance() {
         return instance;
     }
 
-    public void readFromExcel(File file) throws IOException {
-        String fileName = file.getName();
-        if (fileName.substring(fileName.lastIndexOf(".")).equals("xls")) {
-            readFromXLSFile(file);
-        } else if (fileName.substring(fileName.lastIndexOf(".")).equals("xlsx")) {
-            readFromXLSXFile(file);
-        } else {
-            System.out.println("Can't read this file type");
+    private ImportMapper importMapper = new ImportMapperImpl();
+
+    private ImportRealtyDao importRealtyDao = ImportRealtyDao.getInstance();
+
+    private ExcelReaderService() {
+    }
+
+    public ImportResponseDto readFromExcel(RequestHelper requestHelper, List<Part> partsList) throws IOException {
+
+        for (Part part : partsList) {
+            String fileName = part.getSubmittedFileName();
+
+            if (!fileName.endsWith("xls") && !fileName.endsWith("xlsx")) {
+                throw new RuntimeException("Необходимо загрузить файл в формате xls или xlsx");
+            }
+
+            if (fileName.endsWith("xls")) {
+                return readFromXLSFile(requestHelper, part.getInputStream());
+            }
+
+            if (fileName.endsWith("xlsx")) {
+                return readFromXLSXFile(requestHelper, part.getInputStream());
+            }
+        }
+
+        throw new RuntimeException("Необходимо загрузить файл в формате xls или xlsx");
+    }
+
+    private ImportResponseDto readFromXLSFile(RequestHelper requestHelper, InputStream inputStream) throws IOException {
+        try (HSSFWorkbook excelBook = new HSSFWorkbook(inputStream);) {
+            HSSFSheet excelSheet = excelBook.getSheetAt(0);
+            return readRowsFromExcel(requestHelper, excelSheet);
+        }
+
+    }
+
+    private ImportResponseDto readFromXLSXFile(RequestHelper requestHelper, InputStream inputStream) throws IOException {
+        try (XSSFWorkbook excelBook = new XSSFWorkbook(inputStream);) {
+            XSSFSheet excelSheet = excelBook.getSheetAt(0);
+            return readRowsFromExcel(requestHelper, excelSheet);
         }
     }
 
-    private void readFromXLSFile(File file) throws IOException {
-        HSSFWorkbook excelBook = new HSSFWorkbook(new FileInputStream(file));
-        HSSFSheet excelSheet = excelBook.getSheetAt(0);
-        readRowsFromExcel(excelSheet);
-        excelBook.close();
-    }
+    private ImportResponseDto readRowsFromExcel(RequestHelper requestHelper, Sheet sheet) {
+        int firstIdx = -1;
+        for (int i = 0; ;i++) {
+            if (sheet.getRow(i).getCell(0) == null) {
+                continue;
+            }
 
-    private void readFromXLSXFile(File file) throws IOException {
-        XSSFWorkbook excelBook = new XSSFWorkbook(new FileInputStream(file));
-        XSSFSheet excelSheet = excelBook.getSheetAt(0);
-        readRowsFromExcel(excelSheet);
-        excelBook.close();
-    }
+            if (sheet.getRow(i).getCell(0).getStringCellValue().contains("Местоположение")) {
+                firstIdx = i;
+                break;
+            }
+        }
 
-    private void readRowsFromExcel(Sheet sheet) {
-        for (Row row : sheet) {
+        List<ImportRealtyObjectEntity> realtyObjectEntityList = new ArrayList<>();
+
+        // todo Нужно сделать валидацию.
+        for (int i = firstIdx + 1; ; i++) {
+            Row row = sheet.getRow(i);
+
+            if (row == null) {
+                break;
+            }
+
+            ImportExcelRealtyDto excelRealtyDto = new ImportExcelRealtyDto();
+
             if (row.getCell(0).getCellType() == CellType.STRING) {
                 String location = row.getCell(0).getStringCellValue();
-                System.out.println("location : " + location);
+                excelRealtyDto.setAddress(location);
             }
             if (row.getCell(1).getCellType() == CellType.NUMERIC) {
-                Integer rooms = (int) row.getCell(1).getNumericCellValue();
-                System.out.println("rooms :" + rooms);
+                int rooms = (int) row.getCell(1).getNumericCellValue();
+                excelRealtyDto.setRoomsCount(rooms);
             }
             if (row.getCell(2).getCellType() == CellType.STRING) {
                 String buildingType = row.getCell(2).getStringCellValue();
-                System.out.println("buildingType : " + buildingType);
+                excelRealtyDto.setRealtySegment(ERealtySegment.getByTitle(buildingType));
             }
             if (row.getCell(3).getCellType() == CellType.NUMERIC) {
-                Integer floorsInBuilding = (int) row.getCell(3).getNumericCellValue();
-                System.out.println("floorsInBuilding :" + floorsInBuilding);
+                int floorsInBuilding = (int) row.getCell(3).getNumericCellValue();
+                excelRealtyDto.setHouseFloorsCount(floorsInBuilding);
             }
             if (row.getCell(4).getCellType() == CellType.STRING) {
                 String wallsMaterial = row.getCell(4).getStringCellValue();
-                System.out.println("wallsMaterial : " + wallsMaterial);
+                excelRealtyDto.setWallMaterial(ESimpleHouseType.getByTitle(wallsMaterial));
             }
             if (row.getCell(5).getCellType() == CellType.NUMERIC) {
-                Integer floor = (int) row.getCell(5).getNumericCellValue();
-                System.out.println("floor :" + floor);
+                int floor = (int) row.getCell(5).getNumericCellValue();
+                excelRealtyDto.setFloor(floor);
             }
             if (row.getCell(6).getCellType() == CellType.NUMERIC) {
-                Float apartmentArea = (float) row.getCell(6).getNumericCellValue();
-                System.out.println("apartmentArea :" + apartmentArea);
+                double apartmentArea = row.getCell(6).getNumericCellValue();
+                excelRealtyDto.setTotalArea(apartmentArea);
             }
             if (row.getCell(7).getCellType() == CellType.NUMERIC) {
-                Float kitchenArea = (float) row.getCell(7).getNumericCellValue();
-                System.out.println("kitchenArea :" + kitchenArea);
+                double kitchenArea = (float) row.getCell(7).getNumericCellValue();
+                excelRealtyDto.setKitchenArea(kitchenArea);
             }
-            if (row.getCell(8).getCellType() == CellType.BOOLEAN) {
-                Boolean balcony = row.getCell(8).getBooleanCellValue();
-                System.out.println("balcony :" + balcony);
+            if (row.getCell(8).getCellType() == CellType.STRING) {
+                String balcony = row.getCell(8).getStringCellValue();
+                excelRealtyDto.setBalcon(EBalconParam.getByTitle(balcony));
             }
             if (row.getCell(9).getCellType() == CellType.NUMERIC) {
-                Integer distanceToMetro = (int) row.getCell(9).getNumericCellValue();
-                System.out.println("distanceToMetro :" + distanceToMetro);
+                int distanceToMetro = (int) row.getCell(9).getNumericCellValue();
+                excelRealtyDto.setMetroDistance(distanceToMetro);
             }
             if (row.getCell(10).getCellType() == CellType.STRING) {
                 String condition = row.getCell(10).getStringCellValue();
-                System.out.println("condition : " + condition);
+                excelRealtyDto.setRepairType(ERepairType.getByTitle(condition));
             }
+
+            realtyObjectEntityList.add(importMapper.toImportRealtyObjectEntity(excelRealtyDto));
         }
+
+        ImportRealtyRequestEntity importRealtyRequestEntity = new ImportRealtyRequestEntity();
+        importRealtyRequestEntity.setUserId(requestHelper.getUserInfo().getId());
+        importRealtyRequestEntity.setObjectsCount(realtyObjectEntityList.size());
+
+        Connection connection = requestHelper.getConnection();
+
+        try {
+            // Сохранить это в БД.
+            importRealtyDao.saveImportRealtyRequest(connection, importRealtyRequestEntity, realtyObjectEntityList);
+
+            realtyObjectEntityList = importRealtyDao.getImportRealtyObjectsByRequest(connection, importRealtyRequestEntity.getId());
+
+            connection.commit();
+        } catch (SQLException exception) {
+            LOGGER.error("Ошибка при сохранении запроса на импорт", exception);
+            throw new RuntimeException("Ошибка при сохранении запроса на импорт", exception);
+        }
+
+        List<ImportExcelRealtyDto> realtyDtoList = realtyObjectEntityList.stream()
+                                                                         .map((elm) -> importMapper.toImportExcelRealtyDto(elm))
+                                                                         .collect(Collectors.toList());
+
+        ImportResponseDto importResponseDto = new ImportResponseDto();
+        importResponseDto.setImportExcelRealtyDtoList(realtyDtoList);
+        importResponseDto.setRequestId(importRealtyRequestEntity.getId());
+
+        return importResponseDto;
     }
 }

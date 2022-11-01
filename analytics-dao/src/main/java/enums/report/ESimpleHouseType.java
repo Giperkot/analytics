@@ -4,16 +4,13 @@ import db.annotations.EnumMethodDataBase;
 import interfaces.report.ITitled;
 
 @EnumMethodDataBase(fromDbName = "fromString")
-public enum EHouseType implements ITitled {
+public enum ESimpleHouseType implements ITitled {
     UNKNOWN(0, "UNKNOWN", "Неизвестно"),
-    BRICK(1, "BRICK", "Кирпичный"),
-    MONOLIT(2, "MONOLIT", "Монолитный"),
-    PANEL(3, "PANEL", "Панельный"),
-    BLOCK(4, "BLOCK", "Блочный"),
-    BRICK_MONOLIT(5, "BRICK_MONOLIT", "Монолитно-кирпичный"),
-    WOOD(6, "WOOD", "Деревянный");
+    BRICK(1, "BRICK", "Кирпичн"),
+    MONOLIT(2, "MONOLIT", "Монолит)"),
+    PANEL(3, "PANEL", "Панель");
 
-    private static EHouseType[] values = values();
+    private static ESimpleHouseType[] values = values();
 
     private final int id;
 
@@ -21,14 +18,14 @@ public enum EHouseType implements ITitled {
 
     private final String title;
 
-    EHouseType(int id, String name, String title) {
+    ESimpleHouseType(int id, String name, String title) {
         this.id = id;
         this.name = name;
         this.title = title;
     }
 
-    public static EHouseType fromString (String value) {
-        for (EHouseType val : values) {
+    public static ESimpleHouseType fromString(String value) {
+        for (ESimpleHouseType val : values) {
             if (val.name.equals(value)) {
                 return val;
             }
@@ -50,8 +47,8 @@ public enum EHouseType implements ITitled {
         return name;
     }
 
-    public static EHouseType getByOrdinal(int ordinal) {
-        for (EHouseType value : values) {
+    public static ESimpleHouseType getByOrdinal(int ordinal) {
+        for (ESimpleHouseType value : values) {
             if (value.id == ordinal) {
                 return value;
             }
@@ -60,7 +57,21 @@ public enum EHouseType implements ITitled {
         throw new RuntimeException("Нет такого id");
     }
 
-    public static EHouseType[] getValues() {
+    public static ESimpleHouseType getByTitle(String value) {
+
+        String lower = value.toLowerCase().strip();
+
+        for (ESimpleHouseType val : values) {
+            if (val.title.toLowerCase().equals(lower)) {
+                return val;
+            }
+        }
+
+        throw new IllegalArgumentException("Значение не найдено " + value);
+    }
+
+    public static ESimpleHouseType[] getValues() {
         return values;
     }
+
 }
