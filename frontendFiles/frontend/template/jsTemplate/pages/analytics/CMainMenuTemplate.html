@@ -1,15 +1,42 @@
-<script id="CMainMenuTemplate" type="text/template">
+<script id="CMainMenuTemplate" type="text/template" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js">
 
     <div class="main_menu_wrapper">
-        <div class="main_menu_item" data-link="/realtySearch" data-cmp="realtySearch">
-            Недвижимость: Квартиры
-        </div>
 
-        <div class="main_menu_item" data-link="/reports" data-cmp="reports">
-            Отчеты
-        </div>
-
+        <input id="importFile" type="file" name="importFile"
+               accept="application/excel,application/x-excel,application/x-msexcel,application/vnd.ms-excel"
+               onchange="uploadFile()"/>
 
     </div>
+</script>
 
+<script>
+    async function uploadFile() {
+        let input = document.querySelector('input');
+
+        console.log(input.files[0]);
+
+        let excelFile = new FileReader();
+        excelFile.append("file", input.files[0]);   //Здесь падает на .files[0]
+        //Потому что Cannot read properties of undefined (reading 'files')
+        //Хотя выше успешно выводит input.files[0] в консоль (почему?)
+
+        let data = {
+            file: excelFile
+        };
+
+        helper.getHttpPromise({
+            method: "POST",
+            url: "/api/import/readExcel",
+            contentType: "application/json",
+            jsonData: data
+        }).then(function (response) {
+            var data = JSON.parse(response);
+
+            if (data.success) {
+                alert("Успех");
+            } else {
+                alert("Произошла ошибка");
+            }
+        });
+    }
 </script>

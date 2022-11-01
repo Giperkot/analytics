@@ -45,6 +45,8 @@
             case "reports":
               toPage = "reports";
               break;
+            case "import":
+              break;
             case "analytics":
             default:
               toPage = this.properties.defaultPage;
@@ -341,8 +343,14 @@
           properties: {
             hidden: true
           }
+        }, {
+          name: "import",
+          type: "CRealtyImport",
+          container: ".page_switcher",
+          properties: {
+            hidden: true
+          }
         }
-
       ]
     });
 
