@@ -354,7 +354,7 @@
               },
               events: {
                 onLoadFile: function () {
-                  var fileUploader = cmpCore.findByName("realtyImportUploader");
+                  let fileUploader = cmpCore.findByName("realtyImportUploader");
 
                   let formData = fileUploader.getFormData();
 
@@ -365,13 +365,63 @@
                   }).then(function (response) {
                     var ans = JSON.parse(response);
 
-                    console.log(ans);
-
-                    /*documentResultTable.setGridData(ans);
-                    documentResultTable.render(documentResultTable.rootElm.containerElm);
-                    documentResultTable.bind();*/
+                    let resultTable = cmpCore.findByName("resultTable");
+                    resultTable.setGridData(ans.importExcelRealtyDtoList);
+                    resultTable.render(resultTable.rootElm.containerElm);
+                    resultTable.bind();
                   });
 
+                }
+              }
+            }, {
+              name: "resultTable",
+              type: "CTableSelector",
+              container: ".realty_result_table",
+              properties: {
+                hidden: true
+              },
+              model: {
+                labelText: "Список загруженных объектов",
+                columns: [
+                  {
+                    label: "Адрес",
+                    name: "address"
+                  }, {
+                    label: "Кол. комнат",
+                    name: "roomsCount"
+                  }, {
+                    label: "Сегмент",
+                    name: "realtySegment"
+                  }, {
+                    label: "Кол. этажей",
+                    name: "houseFloorsCount"
+                  }, {
+                    label: "Материал стен",
+                    name: "wallMaterial"
+                  }, {
+                    label: "Этаж",
+                    name: "floor"
+                  }, {
+                    label: "Площадь",
+                    name: "totalArea"
+                  }, {
+                    label: "Кухня",
+                    name: "kitchenArea"
+                  }, {
+                    label: "Балкон",
+                    name: "balcon"
+                  }, {
+                    label: "Расст. до метро",
+                    name: "metroDistance"
+                  }, {
+                    label: "Ремонт",
+                    name: "repairType"
+                  },
+                ],
+                controls: {
+                  add: false,
+                  edit: false,
+                  delete: false
                 }
               }
             }
