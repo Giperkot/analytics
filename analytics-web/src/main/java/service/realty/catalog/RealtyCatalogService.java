@@ -35,9 +35,14 @@ public class RealtyCatalogService implements IRealtyCatalogService {
     public HouseAddInfoEntity fillHouseYearInfo(HouseEntity houseEntity, Connection connection) throws InterruptedException, IOException, URISyntaxException {
 
         // Сначала ищем в GisZkh
-        HouseAddInfoEntity houseAddInfoEntity = gisZkhService.fillHouseYearInfo(houseEntity, connection);
+        HouseAddInfoEntity houseAddInfoEntity = null;
+        try {
+            houseAddInfoEntity = gisZkhService.fillHouseYearInfo(houseEntity, connection);
+        } catch (Exception ex) {
 
-        if (houseAddInfoEntity.getBuildYear() < 1 || houseAddInfoEntity.getHouseType() == null
+        }
+
+        if (houseAddInfoEntity == null || houseAddInfoEntity.getBuildYear() < 1 || houseAddInfoEntity.getHouseType() == null
                 || houseAddInfoEntity.getHouseType() == EHouseType.UNKNOWN) {
             HouseAddInfoEntity twoGisHouseInfo = twoGisService.fillHouseYearInfo(houseEntity, connection);
 

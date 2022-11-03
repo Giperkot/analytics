@@ -25,13 +25,7 @@ import dto.report.RequestReportDto;
 import enums.EDirectionName;
 import enums.realty.EStreetType;
 import enums.realty.EVillageType;
-import enums.report.EBalconParam;
-import enums.report.EFloor;
-import enums.report.EHouseBuildYear;
-import enums.report.EHouseFloor;
-import enums.report.EHouseType;
-import enums.report.ERealtyConfigType;
-import enums.report.ERoomsCount;
+import enums.report.*;
 import exceptions.NoCoordsInCityException;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.hash.TLongHashSet;
@@ -232,13 +226,20 @@ public class RealtyService extends AbstractParser {
 
         String[] addrParts = address.split(",");
 
+        int addrPartsLength = addrParts.length;
+
+        if (addrParts[addrParts.length - 1].contains("этаж") || addrParts[addrParts.length - 1].contains("эт.")) {
+            // Отбрасываем этаж.
+            addrPartsLength = addrParts.length - 1;
+        }
+
         boolean haveStreet = false;
         int lastVillageIdx = -1;
         // boolean haveVillage = false;
         VillageDto village = new VillageDto();
         StreetDto streetDto = new StreetDto();
 
-        for (int i = 0; i < addrParts.length; i++) {
+        for (int i = 0; i < addrPartsLength; i++) {
 
             EVillageType villageType = EVillageType.getVillageType(addrParts[i]);
 
@@ -249,7 +250,7 @@ public class RealtyService extends AbstractParser {
                                                .replace('ё', 'е')
                                                .trim();
 
-                if (i == addrParts.length - 1 && villageType == EVillageType.THE_VILLAGE) {
+                if (i == addrPartsLength - 1 && villageType == EVillageType.THE_VILLAGE) {
                     continue;
                 }
 
@@ -270,18 +271,20 @@ public class RealtyService extends AbstractParser {
 
         }
 
-        if (!streetDto.exists() && lastVillageIdx == addrParts.length - 2) {
+        if (!streetDto.exists() && lastVillageIdx == addrPartsLength - 2) {
             houseNum = getHouseNumByIdx(addrParts, lastVillageIdx + 1);
         }
 
-        if (streetDto.exists() && strtIdx < addrParts.length - 1) {
+        if (streetDto.exists() && strtIdx < addrPartsLength - 1) {
             houseNum = getHouseNumByIdx(addrParts, strtIdx + 1);
         }
 
-        if (lastVillageIdx != addrParts.length - 1 &&
-                (!streetDto.exists() && lastVillageIdx < addrParts.length - 2
-                || CommonUtils.isNullOrEmpty(houseNum) && (!(streetDto.exists() && strtIdx == addrParts.length - 1)))) {
+        if (lastVillageIdx != addrPartsLength - 1 &&
+                (!streetDto.exists() && lastVillageIdx < addrPartsLength - 2
+                || CommonUtils.isNullOrEmpty(houseNum) && (!(streetDto.exists() && strtIdx == addrPartsLength - 1)))) {
             // Старый способ
+            // String lastPartAddr =
+
             int lastSpace = address.lastIndexOf(" ");
             int lastComma = address.lastIndexOf(",");
             int preLastComma = address.lastIndexOf(",", lastComma - 1);
@@ -576,6 +579,24 @@ public class RealtyService extends AbstractParser {
             if (titled instanceof ERoomsCount) {
                 result.setRoomsCount((ERoomsCount)titled);
             }
+            if (titled instanceof ETotalArea) {
+                result.setTotalArea((ETotalArea)titled);
+            }
+            if (titled instanceof EKitchenArea) {
+                result.setKitchenArea((EKitchenArea)titled);
+            }
+            if (titled instanceof EMetroDistance) {
+                result.setMetroDistance((EMetroDistance)titled);
+            }
+            if (titled instanceof ERealtySegment) {
+                result.setRealtySegment((ERealtySegment)titled);
+            }
+            if (titled instanceof ESimpleHouseType) {
+                result.setSimpleHouseType((ESimpleHouseType)titled);
+            }
+            if (titled instanceof ERepairType) {
+                result.setRepairType((ERepairType)titled);
+            }
         }
 
         return result;
@@ -586,11 +607,11 @@ public class RealtyService extends AbstractParser {
         Connection connection = requestHelper.getConnection();
 
         List<NoticeWrapper> noticeInfoList = reportService.getAllActiveNotices(connection);
-        RealtyConfigurationDto realtyConfigurationDto = ERealtyConfigType.COMPLEX.buildConfiguration();
+        RealtyConfigurationDto realtyConfigurationDto = ERealtyConfigType.HAKATON_FULL_CONFIG.buildConfiguration();
 
         RequestReportDto requestReportDto = new RequestReportDto();
-        // Perm
-        requestReportDto.setCityId(1L);
+        // Moscow
+        requestReportDto.setCityId(2L);
 
         // Создаём классифаер.
         ReportClassifier reportClassifier = reportService.createReportClassifier(connection, realtyConfigurationDto, requestReportDto);
@@ -602,7 +623,8 @@ public class RealtyService extends AbstractParser {
 
                 NoticeCategoryEntity noticeCategoryEntity = toNoticeCategory(titledList, noticeWrapper.getNoticeEntity().getId());
                 noticeCategoryEntity.setCanonTypeNumber(position);
-                noticeCategoryEntity.setSquareValue(noticeWrapper.getNoticeSquare());
+                noticeCategoryEntity.setRealtyConfigType(ERealtyConfigType.HAKATON_FULL_CONFIG);
+                // noticeCategoryEntity.setSquareValue(noticeWrapper.getNoticeSquare());
 
                 realtyDao.saveOrUpdateNoticeCategory(connection, noticeCategoryEntity);
 

@@ -17,14 +17,7 @@ import enums.report.ERealtyConfigType;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import helper.report.ReportClassifier;
-import helper.report.param.BalconClassParam;
-import helper.report.param.FloorClassParam;
-import helper.report.param.HouseBuildYearClassParam;
-import helper.report.param.HouseFloorClassParam;
-import helper.report.param.HouseTypeClassParam;
-import helper.report.param.KitchenSquareClassParam;
-import helper.report.param.PlacementClassParam;
-import helper.report.param.RoomsCountClassParam;
+import helper.report.param.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.realty.RealtyService;
@@ -82,7 +75,7 @@ public class ReportService {
         }
 
         if (realtyConfigurationDto.isKitchenSquare()) {
-            reportClassifier.addClassParam(new KitchenSquareClassParam());
+            reportClassifier.addClassParam(new KitchenAreaClassParam());
         }
 
         if (realtyConfigurationDto.isBalcon()) {
@@ -99,6 +92,26 @@ public class ReportService {
 
         if (realtyConfigurationDto.isHouseBuildYear()) {
             reportClassifier.addClassParam(new HouseBuildYearClassParam());
+        }
+
+        if (realtyConfigurationDto.isRealtySegment()) {
+            reportClassifier.addClassParam(new RealtySegmentParam());
+        }
+
+        if (realtyConfigurationDto.isSimpleHouseType()) {
+            reportClassifier.addClassParam(new SimpleHouseTypeParam());
+        }
+
+        if (realtyConfigurationDto.isTotalSquare()) {
+            reportClassifier.addClassParam(new TotalSquareParam());
+        }
+
+        if (realtyConfigurationDto.isMetroDistance()) {
+            reportClassifier.addClassParam(new MetroDistanceClassParam());
+        }
+
+        if (realtyConfigurationDto.isRepairType()) {
+            reportClassifier.addClassParam(new RepairTypeClassParam());
         }
 
         return reportClassifier;

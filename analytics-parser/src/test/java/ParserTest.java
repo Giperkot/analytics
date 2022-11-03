@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class ParserTest {
 
@@ -26,7 +25,7 @@ public class ParserTest {
         ParseTaskEntity parseTaskEntity = new ParseTaskEntity();
         // parseTaskEntity.setUrl("https://www.avito.ru/perm/kvartiry/1-k._kvartira_35m_110et._2455378873");
         // parseTaskEntity.setUrl("https://www.avito.ru/perm/kvartiry/1-k._kvartira_316m_25et._2500563396");
-        parseTaskEntity.setUrl("/moskva/kvartiry/2-k._kvartira_602m_48et._2564887698");
+        parseTaskEntity.setUrl("/moskva/kvartiry/2-k._kvartira_45m_212et._2583251538");
 
         NoticeEntityWrapper noticeEntityWrapper = avitoParser.parseDetailNotice(headerMap, parseTaskEntity);
 

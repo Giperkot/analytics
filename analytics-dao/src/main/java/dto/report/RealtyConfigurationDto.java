@@ -10,6 +10,8 @@ public class RealtyConfigurationDto {
 
     private boolean houseFloor;
 
+    private boolean totalSquare;
+
     private boolean kitchenSquare;
 
     private boolean balcon;
@@ -19,6 +21,14 @@ public class RealtyConfigurationDto {
     private boolean houseType;
 
     private boolean houseBuildYear;
+
+    private boolean realtySegment;
+
+    private boolean simpleHouseType;
+
+    private boolean metroDistance;
+
+    private boolean repairType;
 
     public EPlacement getPlacement() {
         return placement;
@@ -82,5 +92,45 @@ public class RealtyConfigurationDto {
 
     public void setHouseBuildYear(boolean houseBuildYear) {
         this.houseBuildYear = houseBuildYear;
+    }
+
+    public boolean isRealtySegment() {
+        return realtySegment;
+    }
+
+    public void setRealtySegment(boolean realtySegment) {
+        this.realtySegment = realtySegment;
+    }
+
+    public boolean isSimpleHouseType() {
+        return simpleHouseType;
+    }
+
+    public void setSimpleHouseType(boolean simpleHouseType) {
+        this.simpleHouseType = simpleHouseType;
+    }
+
+    public boolean isMetroDistance() {
+        return metroDistance;
+    }
+
+    public void setMetroDistance(boolean metroDistance) {
+        this.metroDistance = metroDistance;
+    }
+
+    public boolean isTotalSquare() {
+        return totalSquare;
+    }
+
+    public void setTotalSquare(boolean totalSquare) {
+        this.totalSquare = totalSquare;
+    }
+
+    public boolean isRepairType() {
+        return repairType;
+    }
+
+    public void setRepairType(boolean repairType) {
+        this.repairType = repairType;
     }
 }

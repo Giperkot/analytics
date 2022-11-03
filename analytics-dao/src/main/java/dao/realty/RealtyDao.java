@@ -33,7 +33,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
-import java.util.Locale;
 
 public class RealtyDao extends AbstractDao {
 
@@ -312,66 +311,122 @@ public class RealtyDao extends AbstractDao {
     }
 
     public void saveOrUpdateNoticeCategory(Connection connection, NoticeCategoryEntity noticeCategoryEntity) {
-        String sql = "insert into realty.notice_category (notice_id, canon_type_number, rooms_count, floor, house_floor, house_type, house_build_year, balcon, square_value) "
-                + "values (?, ?, ?, ?, ?, ?, ?, ?, ?) "
+        String sql = "insert into realty.notice_category (notice_id, canon_type_number, rooms_count, floor, house_floor, house_type, house_build_year, balcon, classifier_category,"
+                + "realty_segment, repair_type, simple_house_type, total_square, kitchen_square, metro_distance) "
+                + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
                 + "    on conflict(notice_id) do update set canon_type_number = ?, rooms_count = ?, floor = ?, house_floor = ?, house_type = ?, "
-                + "                                         house_build_year = ?, balcon = ?, square_value = ?";
+                + "                                         house_build_year = ?, balcon = ?, classifier_category = ?, realty_segment = ?, "
+                + "                                         repair_type = ?, simple_house_type = ?, total_square = ?, kitchen_square = ?, metro_distance = ? ";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, noticeCategoryEntity.getNoticeId());
 
             statement.setInt(2, noticeCategoryEntity.getCanonTypeNumber());
-            statement.setInt(10, noticeCategoryEntity.getCanonTypeNumber());
-
-            statement.setDouble(9, noticeCategoryEntity.getSquareValue());
-            statement.setDouble(17, noticeCategoryEntity.getSquareValue());
+            statement.setInt(16, noticeCategoryEntity.getCanonTypeNumber());
 
             if (noticeCategoryEntity.getRoomsCount() == null) {
                 statement.setNull(3, Types.VARCHAR);
-                statement.setNull(11, Types.VARCHAR);
+                statement.setNull(17, Types.VARCHAR);
             } else {
                 statement.setString(3, noticeCategoryEntity.getRoomsCount().getName());
-                statement.setString(11, noticeCategoryEntity.getRoomsCount().getName());
+                statement.setString(17, noticeCategoryEntity.getRoomsCount().getName());
             }
 
             if (noticeCategoryEntity.getFloor() == null) {
                 statement.setNull(4, Types.VARCHAR);
-                statement.setNull(12, Types.VARCHAR);
+                statement.setNull(18, Types.VARCHAR);
             } else {
                 statement.setString(4, noticeCategoryEntity.getFloor().getName());
-                statement.setString(12, noticeCategoryEntity.getFloor().getName());
+                statement.setString(18, noticeCategoryEntity.getFloor().getName());
             }
 
             if (noticeCategoryEntity.getHouseFloor() == null) {
                 statement.setNull(5, Types.VARCHAR);
-                statement.setNull(13, Types.VARCHAR);
+                statement.setNull(19, Types.VARCHAR);
             } else {
                 statement.setString(5, noticeCategoryEntity.getHouseFloor().getName());
-                statement.setString(13, noticeCategoryEntity.getHouseFloor().getName());
+                statement.setString(19, noticeCategoryEntity.getHouseFloor().getName());
             }
 
             if (noticeCategoryEntity.getHouseType() == null) {
                 statement.setNull(6, Types.VARCHAR);
-                statement.setNull(14, Types.VARCHAR);
+                statement.setNull(20, Types.VARCHAR);
             } else {
                 statement.setString(6, noticeCategoryEntity.getHouseType().getName());
-                statement.setString(14, noticeCategoryEntity.getHouseType().getName());
+                statement.setString(20, noticeCategoryEntity.getHouseType().getName());
             }
 
             if (noticeCategoryEntity.getHouseBuildYear() == null) {
                 statement.setNull(7, Types.VARCHAR);
-                statement.setNull(15, Types.VARCHAR);
+                statement.setNull(21, Types.VARCHAR);
             } else {
                 statement.setString(7, noticeCategoryEntity.getHouseBuildYear().getName());
-                statement.setString(15, noticeCategoryEntity.getHouseBuildYear().getName());
+                statement.setString(21, noticeCategoryEntity.getHouseBuildYear().getName());
             }
 
             if (noticeCategoryEntity.getBalcon() == null) {
                 statement.setNull(8, Types.VARCHAR);
-                statement.setNull(16, Types.VARCHAR);
+                statement.setNull(22, Types.VARCHAR);
             } else {
-                statement.setString(8, noticeCategoryEntity.getFloor().getName());
-                statement.setString(16, noticeCategoryEntity.getFloor().getName());
+                statement.setString(8, noticeCategoryEntity.getBalcon().getName());
+                statement.setString(22, noticeCategoryEntity.getBalcon().getName());
+            }
+
+            // classifier_category
+            if (noticeCategoryEntity.getRealtyConfigType() == null) {
+                statement.setNull(9, Types.VARCHAR);
+                statement.setNull(23, Types.VARCHAR);
+            } else {
+                statement.setString(9, noticeCategoryEntity.getRealtyConfigType().getConfigName());
+                statement.setString(23, noticeCategoryEntity.getRealtyConfigType().getConfigName());
+            }
+
+            if (noticeCategoryEntity.getRealtySegment() == null) {
+                statement.setNull(10, Types.VARCHAR);
+                statement.setNull(24, Types.VARCHAR);
+            } else {
+                statement.setString(10, noticeCategoryEntity.getRealtySegment().getName());
+                statement.setString(24, noticeCategoryEntity.getRealtySegment().getName());
+            }
+
+            if (noticeCategoryEntity.getRepairType() == null) {
+                statement.setNull(11, Types.VARCHAR);
+                statement.setNull(25, Types.VARCHAR);
+            } else {
+                statement.setString(11, noticeCategoryEntity.getRepairType().getName());
+                statement.setString(25, noticeCategoryEntity.getRepairType().getName());
+            }
+
+            if (noticeCategoryEntity.getSimpleHouseType() == null) {
+                statement.setNull(12, Types.VARCHAR);
+                statement.setNull(26, Types.VARCHAR);
+            } else {
+                statement.setString(12, noticeCategoryEntity.getSimpleHouseType().getName());
+                statement.setString(26, noticeCategoryEntity.getSimpleHouseType().getName());
+            }
+
+            if (noticeCategoryEntity.getTotalArea() == null) {
+                statement.setNull(13, Types.VARCHAR);
+                statement.setNull(27, Types.VARCHAR);
+            } else {
+                statement.setString(13, noticeCategoryEntity.getTotalArea().getName());
+                statement.setString(27, noticeCategoryEntity.getTotalArea().getName());
+            }
+
+            if (noticeCategoryEntity.getKitchenArea() == null) {
+                statement.setNull(14, Types.VARCHAR);
+                statement.setNull(28, Types.VARCHAR);
+            } else {
+                statement.setString(14, noticeCategoryEntity.getKitchenArea().getName());
+                statement.setString(28, noticeCategoryEntity.getKitchenArea().getName());
+            }
+
+            if (noticeCategoryEntity.getMetroDistance() == null) {
+                statement.setNull(15, Types.VARCHAR);
+                statement.setNull(29, Types.VARCHAR);
+            } else {
+                statement.setString(15, noticeCategoryEntity.getMetroDistance().getName());
+                statement.setString(29, noticeCategoryEntity.getMetroDistance().getName());
             }
 
             statement.executeUpdate();

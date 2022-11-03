@@ -1,8 +1,10 @@
 package enums.report;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import db.annotations.EnumMethodDataBase;
 import dto.report.RealtyConfigurationDto;
 
+@EnumMethodDataBase(fromDbName = "fromString")
 public enum ERealtyConfigType {
 
     /**
@@ -22,6 +24,14 @@ public enum ERealtyConfigType {
      */
     COMPLEX("COMPLEX"),
     /**
+     * Квартира, кол. комнат, Сегмент жилья, Этажность, Материал стен
+     */
+    HAKATON_CONFIG("HAKATON_CONFIG"),
+    /**
+     * Квартира, кол. комнат, Сегмент жилья, Этажность, Материал стен
+     */
+    HAKATON_FULL_CONFIG("HAKATON_FULL_CONFIG"),
+    /**
      * Микрорайон, Этаж, Этажность, кол. комнат, Год постройки
      */
     MORE_COMPLEX("MORE_COMPLEX"),
@@ -29,6 +39,8 @@ public enum ERealtyConfigType {
      * Микрорайон, Этаж, Этажность, кол. комнат, Год постройки, тип дома., балкон
      */
     MORE_COMPLEX_WITH_HOUSE_TYPE("MORE_COMPLEX_WITH_HOUSE_TYPE");
+
+    private static ERealtyConfigType[] values = values();
 
     @JsonValue
     private final String configName;
@@ -56,6 +68,26 @@ public enum ERealtyConfigType {
                 result.setFloor(true);
                 result.setHouseFloor(true);
                 result.setRoomsCount(true);
+
+                return result;
+            case HAKATON_CONFIG:
+                result.setRoomsCount(true);
+                result.setRealtySegment(true);
+                result.setHouseFloor(true);
+                result.setSimpleHouseType(true);
+
+                return result;
+            case HAKATON_FULL_CONFIG:
+                result.setRoomsCount(true);
+                result.setRealtySegment(true);
+                result.setHouseFloor(true);
+                result.setSimpleHouseType(true);
+                result.setFloor(true);
+                result.setTotalSquare(true);
+                result.setKitchenSquare(true);
+                result.setBalcon(true);
+                result.setMetroDistance(true);
+                result.setRepairType(true);
 
                 return result;
             case MORE_COMPLEX:
@@ -120,6 +152,16 @@ public enum ERealtyConfigType {
         }
 
         throw new IllegalArgumentException("Данной конфигурации на предусмотрено");
+    }
+
+    public ERealtyConfigType fromString(String name) {
+        for (ERealtyConfigType val : values) {
+            if (val.configName.equals(name)) {
+                return val;
+            }
+        }
+
+        throw new IllegalArgumentException("Значение не найдено " + name);
     }
 
     public String getConfigName() {

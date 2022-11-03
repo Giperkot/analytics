@@ -5,12 +5,7 @@ import db.annotations.Column;
 import db.annotations.Entity;
 import db.annotations.Table;
 import db.entity.BaseEntity;
-import enums.report.EBalconParam;
-import enums.report.EFloor;
-import enums.report.EHouseBuildYear;
-import enums.report.EHouseFloor;
-import enums.report.EHouseType;
-import enums.report.ERoomsCount;
+import enums.report.*;
 
 @Entity
 @Table(name = "notice_category", schema = "realty")
@@ -40,8 +35,26 @@ public class NoticeCategoryEntity extends BaseEntity {
     @Column(name = "balcon")
     private EBalconParam balcon;
 
-    @Column(name = "square_value")
-    private double squareValue;
+    @Column(name = "classifier_category")
+    private ERealtyConfigType realtyConfigType;
+
+    @Column(name = "realty_segment")
+    private ERealtySegment realtySegment;
+
+    @Column(name = "repair_type")
+    private ERepairType repairType;
+
+    @Column(name = "simple_house_type")
+    private ESimpleHouseType simpleHouseType;
+
+    @Column(name = "total_square")
+    private ETotalArea totalArea;
+
+    @Column(name = "kitchen_square")
+    private EKitchenArea kitchenArea;
+
+    @Column(name = "metro_distance")
+    private EMetroDistance metroDistance;
 
     public long getNoticeId() {
         return noticeId;
@@ -107,11 +120,59 @@ public class NoticeCategoryEntity extends BaseEntity {
         this.canonTypeNumber = canonTypeNumber;
     }
 
-    public double getSquareValue() {
-        return squareValue;
+    public ERealtyConfigType getRealtyConfigType() {
+        return realtyConfigType;
     }
 
-    public void setSquareValue(double squareValue) {
-        this.squareValue = squareValue;
+    public void setRealtyConfigType(ERealtyConfigType realtyConfigType) {
+        this.realtyConfigType = realtyConfigType;
+    }
+
+    public ERealtySegment getRealtySegment() {
+        return realtySegment;
+    }
+
+    public void setRealtySegment(ERealtySegment realtySegment) {
+        this.realtySegment = realtySegment;
+    }
+
+    public ERepairType getRepairType() {
+        return repairType;
+    }
+
+    public void setRepairType(ERepairType repairType) {
+        this.repairType = repairType;
+    }
+
+    public ESimpleHouseType getSimpleHouseType() {
+        return simpleHouseType;
+    }
+
+    public void setSimpleHouseType(ESimpleHouseType simpleHouseType) {
+        this.simpleHouseType = simpleHouseType;
+    }
+
+    public ETotalArea getTotalArea() {
+        return totalArea;
+    }
+
+    public void setTotalArea(ETotalArea totalArea) {
+        this.totalArea = totalArea;
+    }
+
+    public EKitchenArea getKitchenArea() {
+        return kitchenArea;
+    }
+
+    public void setKitchenArea(EKitchenArea kitchenArea) {
+        this.kitchenArea = kitchenArea;
+    }
+
+    public EMetroDistance getMetroDistance() {
+        return metroDistance;
+    }
+
+    public void setMetroDistance(EMetroDistance metroDistance) {
+        this.metroDistance = metroDistance;
     }
 }

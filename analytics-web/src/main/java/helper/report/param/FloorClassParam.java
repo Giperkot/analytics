@@ -17,7 +17,7 @@ public class FloorClassParam implements IClassParam {
         VFeatureValueEntity houseFloorFeature = value.getFeatureByExactName(EFeatureExactName.HOUSE_FLOORS);
 
         if (floorFeature == null || houseFloorFeature == null) {
-            throw new RuntimeException("Отсутствует этаж");
+            throw new RuntimeException("Отсутствует этаж noticeId: " + value.getNoticeEntity().getId());
         }
 
         int floor = Integer.parseInt(floorFeature.getValue());

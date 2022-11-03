@@ -91,7 +91,8 @@ public class AddressTest {
         houseDto = realtyService.getHouseAddr("Москва, Юго-Восточный административный округ, район Выхино-Жулебино", -1);
         assertEquals("р-н. Выхино-Жулебино, null", houseDto.printFullAddr());
 
-        houseDto = realtyService.getHouseAddr("Москва, Новомосковский административный округ, поселение Московский, жилой комплекс Филатов Луг, ул. Картмазовские Пруды, 2к2", -1);
+        houseDto = realtyService.getHouseAddr("Москва, Зеленоград, к2032, этаж 2", -1);
+        assertEquals("г. Зеленоград, к2032", houseDto.printFullAddr());
         // Москва, Новомосковский административный округ, поселение Московский, жилой комплекс Филатов Луг, ул. Картмазовские Пруды, 2к2
         System.out.println(houseDto.printFullAddr());
 

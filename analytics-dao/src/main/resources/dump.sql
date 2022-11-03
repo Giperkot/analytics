@@ -475,3 +475,17 @@ create table realty.import_realty_object(
     metro_distance int not null,
     repair_type varchar(255) not null
 );
+
+drop view realty.v_notice_info_with_avg_price;
+
+alter table realty.notice_category
+    drop column square_value;
+
+alter table realty.notice_category
+    add column classifier_category varchar(255) not null,
+    add column realty_segment varchar(255),
+    add column repair_type varchar(255),
+    add column simple_house_type varchar(255),
+    add column total_square varchar(255),
+    add column kitchen_square varchar(255),
+    add column metro_distance varchar(255);

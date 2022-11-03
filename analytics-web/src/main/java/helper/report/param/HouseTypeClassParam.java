@@ -11,7 +11,7 @@ public class HouseTypeClassParam implements IClassParam {
     }
 
     @Override
-    public ITitled getValueByOrdinal(int order) {
+    public ITitled getValueByOrdinal(int ordinal) {
         return null;
     }
 

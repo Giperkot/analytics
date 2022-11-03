@@ -21,10 +21,13 @@ public enum EHouseType implements ITitled {
 
     private final String title;
 
+    private final String lowerTitle;
+
     EHouseType(int id, String name, String title) {
         this.id = id;
         this.name = name;
         this.title = title;
+        lowerTitle = title.toLowerCase();
     }
 
     public static EHouseType fromString (String value) {
@@ -48,6 +51,18 @@ public enum EHouseType implements ITitled {
 
     public String getName() {
         return name;
+    }
+
+    public static EHouseType getByTitle(String value) {
+        String lowerValue = value.toLowerCase();
+
+        for (EHouseType val : values) {
+            if (val.lowerTitle.equals(lowerValue)) {
+                return val;
+            }
+        }
+
+        throw new IllegalArgumentException("Значение не найдено " + value);
     }
 
     public static EHouseType getByOrdinal(int ordinal) {

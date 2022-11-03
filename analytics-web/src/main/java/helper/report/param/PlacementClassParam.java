@@ -1,6 +1,5 @@
 package helper.report.param;
 
-import db.entity.parser.view.VDistrictNoticeEntity;
 import db.entity.realty.ShortDistrictEntity;
 import dto.report.NoticeWrapper;
 import gnu.trove.map.hash.TLongIntHashMap;
@@ -32,8 +31,8 @@ public class PlacementClassParam implements IClassParam {
     }
 
     @Override
-    public ITitled getValueByOrdinal(int order) {
-        return shortDistrictEntityList.get(order);
+    public ITitled getValueByOrdinal(int ordinal) {
+        return shortDistrictEntityList.get(ordinal);
     }
 
     @Override
