@@ -603,17 +603,20 @@ public class RealtyService extends AbstractParser {
 
     private List<NoticeEntity> getAlternatives(Connection connection, ImportRealtyObjectEntity importRealtyObjectEntity, HouseEntity houseEntity) {
 
+        double latitude = houseEntity.getCoords().getCenter().getLatitude();
+        double longitude = houseEntity.getCoords().getCenter().getLongitude();
+
         NoticeCategoryEntity noticeCategoryEntity = realtyConverter.toNoticeCategoryEntity(importRealtyObjectEntity);
         noticeCategoryEntity.setRealtyConfigType(ERealtyConfigType.HAKATON_FULL_CONFIG);
 
         List<VNoticeInfoWithAvgPriceEntity> noticeInfoWithAvgPriceEntityList =
-                realtyDao.getNoticesInfoWithAvgPrice(connection, noticeCategoryEntity, true);
+                realtyDao.getNoticesInfoWithAvgPrice(connection, noticeCategoryEntity, true, latitude, longitude);
 
         if (noticeInfoWithAvgPriceEntityList.size() < 5) {
             List<VNoticeInfoWithAvgPriceEntity> liteNoticeList =
-                    realtyDao.getNoticesInfoWithAvgPrice(connection, noticeCategoryEntity, false);
+                    realtyDao.getNoticesInfoWithAvgPrice(connection, noticeCategoryEntity, false, latitude, longitude);
 
-            int i = 0;
+            noticeInfoWithAvgPriceEntityList.addAll(liteNoticeList);
         }
 
         // Теперь нужно заняться поиском в радиусе километра.

@@ -393,6 +393,7 @@ create or replace view realty.v_notice_info_with_avg_price as(
         pt.url,
         h.street,
         h.house_num,
+        h.coords,
         d.name,
         nc.square_value,
         nap.sum as average_sum,

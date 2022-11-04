@@ -1,6 +1,7 @@
 package dao.realty;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import consts.GeoConst;
 import consts.ProjectConst;
 import dao.AbstractDao;
 import db.entity.parser.view.VNoticeEntity;
@@ -474,9 +475,20 @@ public class RealtyDao extends AbstractDao {
         }
     }
 
+    /**
+     * Поиск по параметрам в радиусе километра (или больше ...)
+     *
+     * @param connection
+     * @param noticeCategoryEntity
+     * @param strict
+     * @param latitude
+     * @param longitude
+     * @return
+     */
     public List<VNoticeInfoWithAvgPriceEntity> getNoticesInfoWithAvgPrice(Connection connection,
                                                                           NoticeCategoryEntity noticeCategoryEntity,
-                                                                          boolean strict) {
+                                                                          boolean strict,
+                                                                          double latitude, double longitude) {
 
         String sql = "select * from realty.v_notice_info_with_avg_price";
         String where = "";
@@ -522,7 +534,7 @@ public class RealtyDao extends AbstractDao {
         }
 
         int idx = 1;
-
+        where = addWhereCondition(where, true, "power((coords->'center'->'lat')::double precision - ?, 2) + power((coords->'center'->'lng')::double precision - ?, 2) < ?");
         sql += where;
         // sql += " order by (sum / square_value - average_sum)";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -565,6 +577,16 @@ public class RealtyDao extends AbstractDao {
             }
             if (noticeCategoryEntity.getMetroDistance() != null && strict) {
                 statement.setString(idx++, noticeCategoryEntity.getMetroDistance().getName());
+            }
+
+            if (noticeCategoryEntity.getMetroDistance() != null) {
+                statement.setDouble(idx++, latitude);
+            }
+            if (noticeCategoryEntity.getMetroDistance() != null) {
+                statement.setDouble(idx++, longitude);
+            }
+            if (noticeCategoryEntity.getMetroDistance() != null) {
+                statement.setDouble(idx++, GeoConst.ANGLE_KILO_SQ * 15);
             }
 
             ResultSet resultSet = statement.executeQuery();
