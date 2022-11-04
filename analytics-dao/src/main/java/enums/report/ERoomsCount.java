@@ -59,6 +59,50 @@ public enum ERoomsCount implements ITitled {
         throw new RuntimeException("Нет такого id: " + ordinal);
     }
 
+    public static ERoomsCount getByRoomsCount(String roomsCount) {
+        String lowerRoomsCount = roomsCount.toLowerCase();
+
+        if ("студия".equals(lowerRoomsCount)) {
+            return ERoomsCount.STUDIO;
+        }
+
+        if ("свободная планировка".equals(lowerRoomsCount)) {
+            return ERoomsCount.FREE_LAYOUT;
+        }
+
+        if ("10 и больше".equals(lowerRoomsCount)) {
+            return ERoomsCount.TEN_AND_MORE;
+        }
+
+        int count = Integer.parseInt(lowerRoomsCount);
+
+        if (count == 1) {
+            return ERoomsCount.ONE;
+        }
+
+        if (count == 2) {
+            return ERoomsCount.TWO;
+        }
+
+        if (count == 3) {
+            return ERoomsCount.THREE;
+        }
+
+        if (count == 4) {
+            return ERoomsCount.FOUR;
+        }
+
+        if (count == 5) {
+            return ERoomsCount.FIVE;
+        }
+
+        if (count > 5) {
+            return ERoomsCount.MORE_THAN_FIVE;
+        }
+
+        throw new RuntimeException("некорректное значение количества комнат: " + count);
+    }
+
     public static ERoomsCount[] getValues() {
         return values;
     }

@@ -68,6 +68,22 @@ public enum EKitchenArea implements ITitled {
         throw new RuntimeException("Нет такого id");
     }
 
+    public static EKitchenArea getByArea(double kitchenArea) {
+        if (kitchenArea < 7) {
+            return EKitchenArea.LESS7;
+        }
+
+        if (kitchenArea >= 7 && kitchenArea < 10) {
+            return EKitchenArea.FROM7TO10;
+        }
+
+        if (kitchenArea >= 10 && kitchenArea < 15) {
+            return EKitchenArea.FROM10TO15;
+        }
+
+        return EKitchenArea.MORE15;
+    }
+
     public static EKitchenArea[] getValues() {
         return values;
     }

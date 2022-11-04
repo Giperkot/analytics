@@ -70,6 +70,26 @@ public enum EMetroDistance implements ITitled {
         throw new RuntimeException("Нет такого id");
     }
 
+    public static EMetroDistance fromDistance(int metroDistance) {
+        if (metroDistance <= 5) {
+            return EMetroDistance.LESS5;
+        }
+
+        if (metroDistance <= 10) {
+            return EMetroDistance.FROM5TO10;
+        }
+
+        if (metroDistance <= 15) {
+            return EMetroDistance.FROM10TO15;
+        }
+
+        if (metroDistance <= 30) {
+            return EMetroDistance.FROM15TO30;
+        }
+
+        return EMetroDistance.FROM30TO60;
+    }
+
     public static EMetroDistance[] getValues() {
         return values;
     }

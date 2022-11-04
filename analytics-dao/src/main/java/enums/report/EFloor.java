@@ -52,6 +52,14 @@ public enum EFloor implements ITitled {
         throw new RuntimeException("Нет такого id");
     }
 
+    public static EFloor getByFloorAndHouseFloor(int floor, int houseFloor) {
+        if (floor == houseFloor || floor == 1) {
+            return EFloor.FIRST_OR_LAST;
+        }
+
+        return EFloor.AVERAGE;
+    }
+
     public static EFloor[] getValues() {
         return values;
     }

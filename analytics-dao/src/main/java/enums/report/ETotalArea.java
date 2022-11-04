@@ -70,6 +70,30 @@ public enum ETotalArea implements ITitled {
         throw new RuntimeException("Нет такого id");
     }
 
+    public static ETotalArea getByArea(double totalArea) {
+        if (totalArea < 30) {
+            return ETotalArea.LESS30;
+        }
+
+        if (totalArea >= 30 && totalArea < 50) {
+            return ETotalArea.FROM30TO50;
+        }
+
+        if (totalArea >= 50 && totalArea < 65) {
+            return ETotalArea.FROM50TO65;
+        }
+
+        if (totalArea >= 65 && totalArea < 90) {
+            return ETotalArea.FROM65TO90;
+        }
+
+        if (totalArea >= 90 && totalArea < 120) {
+            return ETotalArea.FROM90TO120;
+        }
+
+        return ETotalArea.MORE120;
+    }
+
     public static ETotalArea[] getValues() {
         return values;
     }

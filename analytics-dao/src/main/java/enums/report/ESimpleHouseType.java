@@ -7,7 +7,7 @@ import interfaces.report.ITitled;
 public enum ESimpleHouseType implements ITitled {
     UNKNOWN(0, "UNKNOWN", "Неизвестно"),
     BRICK(1, "BRICK", "Кирпичн"),
-    MONOLIT(2, "MONOLIT", "Монолит)"),
+    MONOLIT(2, "MONOLIT", "Монолит"),
     PANEL(3, "PANEL", "Панель");
 
     private static ESimpleHouseType[] values = values();

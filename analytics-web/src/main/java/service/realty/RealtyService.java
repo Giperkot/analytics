@@ -7,6 +7,8 @@ import converter.realty.RealtyMapperImpl;
 import core.rest.RequestHelper;
 import dao.parser.ParserDao;
 import dao.realty.RealtyDao;
+import dao.realty.excelimport.ImportRealtyDao;
+import db.entity.parser.NoticeEntity;
 import db.entity.parser.view.VNoticeEntity;
 import db.entity.realty.CityEntity;
 import db.entity.realty.DistrictEntity;
@@ -15,10 +17,12 @@ import db.entity.realty.HouseEntity;
 import db.entity.realty.NoticeCategoryEntity;
 import db.entity.realty.ShortDistrictEntity;
 import db.entity.realty.admin.AddrHouseEntity;
+import db.entity.realty.excelimport.ImportRealtyObjectEntity;
 import db.entity.realty.view.VNoticeInfoWithAvgPriceEntity;
 import dto.common.SimpleResultDto;
 import dto.geocode.CommonCoordsDto;
 import dto.realty.*;
+import dto.realty.standart.SelectedStandartObjectDto;
 import dto.report.NoticeWrapper;
 import dto.report.RealtyConfigurationDto;
 import dto.report.RequestReportDto;
@@ -27,6 +31,8 @@ import enums.realty.EStreetType;
 import enums.realty.EVillageType;
 import enums.report.*;
 import exceptions.NoCoordsInCityException;
+import exceptions.NotFoundAddressInCityException;
+import exceptions.SaveEmptyAddressException;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.hash.TLongHashSet;
 import helper.report.ReportClassifier;
@@ -44,7 +50,9 @@ import service.report.ReportService;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class RealtyService extends AbstractParser {
@@ -59,6 +67,8 @@ public class RealtyService extends AbstractParser {
     private final RealtyDao realtyDao = RealtyDao.getInstance();
 
     private final ParserDao parserDao = ParserDao.getInstance();
+
+    private final ImportRealtyDao importRealtyDao = ImportRealtyDao.getInstance();
 
     private final GeocodeHttpRepository geocodeHttpRepository = GeocodeHttpRepository.getInstance();
 
@@ -318,6 +328,31 @@ public class RealtyService extends AbstractParser {
         return new HouseDto(village, streetDto, houseNum);
     }
 
+    private List<CommonCoordsDto> findHouseCoordsByGeocoder(String address, HouseDto houseDto, CityEntity cityEntity, IGeocoder forcedGeoRepo) {
+        // Сейчас нужно получить координаты по адресу.
+        List<CommonCoordsDto> rawCoordinatesDto = (forcedGeoRepo == null) ? geocodeHttpRepository
+                .getHouseByAddress(cityEntity.getName(), houseDto, address)
+                : forcedGeoRepo.getHouseByAddress(cityEntity.getName(), houseDto, address);
+
+        if (CommonUtils.isNullOrEmpty(rawCoordinatesDto)) {
+            if (!address.contains(cityEntity.getName())) {
+                throw new SaveEmptyAddressException(address);
+            }
+
+            throw new NotFoundAddressInCityException(address);
+        }
+
+        List<CommonCoordsDto> coordinatesDto = new ArrayList<>();
+        // Проверить вхождение в город...
+        for (CommonCoordsDto commonCoordsDto : rawCoordinatesDto) {
+            if (isPointInCity(commonCoordsDto, cityEntity)) {
+                coordinatesDto.add(commonCoordsDto);
+            }
+        }
+
+        return coordinatesDto;
+    }
+
     private void determineAddress(Connection connection, VNoticeEntity noticeEntity, IGeocoder forcedGeoRepo) {
         // ул. Космонавта Леонова, д. 68Б
         String address = noticeEntity.getAddress();
@@ -350,19 +385,6 @@ public class RealtyService extends AbstractParser {
             HouseEntity houseEntity = realtyDao.getHouseByAddress(connection, houseDto.printStreetAddr(), houseNum, cityEntity);
 
             if (houseEntity == null) {
-
-                // long fiasStreet = realtyDao.findFiasStreet(connection, cityEntity.getFiasId(), street, streetType);
-
-                /*if (fiasAddr < 0) {
-                    if (!address.contains(cityEntity.getName())) {
-                        // Это нормально. Нужно пропустить.
-                        saveEmptyAddress(connection, noticeEntity);
-                        return;
-                    }
-
-                    throw new RuntimeException("Улица не найдена");
-                }*/
-
                 if (!houseDto.getStreet().exists() && CommonUtils.isNullOrEmpty(houseDto.getHouseNum())
                     || houseDto.getStreet().getStreetType() == EStreetType.LINE && CommonUtils.isNullOrEmpty(houseDto.getHouseNum())) {
                     // Это не анализируемый объект.
@@ -370,37 +392,20 @@ public class RealtyService extends AbstractParser {
                     return;
                 }
 
-                // Сейчас нужно получить координаты по адресу.
-                List<CommonCoordsDto> rawCoordinatesDto = (forcedGeoRepo == null) ? geocodeHttpRepository
-                        .getHouseByAddress(noticeEntity.getCityName(), houseDto, address)
-                        : forcedGeoRepo.getHouseByAddress(noticeEntity.getCityName(), houseDto, address);
-
-                if (CommonUtils.isNullOrEmpty(rawCoordinatesDto)) {
-                    if (!address.contains(noticeEntity.getCityName())) {
-                        LOGGER.error("Адрес не был найден... noticeId: " + noticeEntity.getId() + ". " + noticeEntity.getAddress());
-                        saveEmptyAddress(connection, noticeEntity);
-                        return;
-                    }
-
+                List<CommonCoordsDto> coordinatesDto;
+                try {
+                    coordinatesDto = findHouseCoordsByGeocoder(address, houseDto, cityEntity, forcedGeoRepo);
+                } catch (SaveEmptyAddressException ex) {
+                    LOGGER.error("Адрес не был найден... noticeId: " + noticeEntity.getId() + ". " + noticeEntity.getAddress());
+                    saveEmptyAddress(connection, noticeEntity);
+                    return;
+                } catch (NotFoundAddressInCityException ex) {
                     throw new RuntimeException("Адрес не был найден... noticeId: " + noticeEntity.getId() + ". " + noticeEntity.getAddress());
                 }
 
-                List<CommonCoordsDto> coordinatesDto = new ArrayList<>();
-                // Проверить вхождение в город...
-                for (CommonCoordsDto commonCoordsDto : rawCoordinatesDto) {
-                    if (isPointInCity(commonCoordsDto, cityEntity)) {
-                        coordinatesDto.add(commonCoordsDto);
-                    }
-                }
-
                 if (coordinatesDto.isEmpty()) {
-                    /*if (!address.contains(noticeEntity.getCityName()) || streetType == EStreetType.CITY) {
-                        saveEmptyAddress(connection, noticeEntity);
-                        return;
-                    }*/
-
                     throw new NoCoordsInCityException("Найденный адрес не входит в " + noticeEntity.getCityName() + ". noticeId: " + noticeEntity.getId() + ". "
-                                                       + noticeEntity.getCityName() + " " + houseDto.printFullAddr());
+                                                              + noticeEntity.getCityName() + " " + houseDto.printFullAddr());
                 }
 
                 HouseCoords houseCoords = coordinatesDto.get(0).getHouseCoords();
@@ -419,13 +424,7 @@ public class RealtyService extends AbstractParser {
                                                        + noticeEntity.getCityName() + " " + street + " " + houseNum);
                 }
 
-                houseEntity = new HouseEntity();
-                houseEntity.setHouseNum(houseNum);
-                houseEntity.setCityId(noticeEntity.getCityId());
-                houseEntity.setStreet(houseDto.printStreetAddr());
-                houseEntity.setDistrictId(houseDistrict.getId());
-                houseEntity.setCoords(houseCoords);
-                // houseEntity.setFiasStreet(fiasAddr);
+                houseEntity = realtyConverter.createHouseEntity(houseDto, noticeEntity.getCityId(), houseDistrict.getId(), houseCoords);
 
                 if (houseEntity.getId() != -1) {
                     // Сохранить новый дом в БД.
@@ -602,6 +601,27 @@ public class RealtyService extends AbstractParser {
         return result;
     }
 
+    private List<NoticeEntity> getAlternatives(Connection connection, ImportRealtyObjectEntity importRealtyObjectEntity, HouseEntity houseEntity) {
+
+        NoticeCategoryEntity noticeCategoryEntity = realtyConverter.toNoticeCategoryEntity(importRealtyObjectEntity);
+        noticeCategoryEntity.setRealtyConfigType(ERealtyConfigType.HAKATON_FULL_CONFIG);
+
+        List<VNoticeInfoWithAvgPriceEntity> noticeInfoWithAvgPriceEntityList =
+                realtyDao.getNoticesInfoWithAvgPrice(connection, noticeCategoryEntity, true);
+
+        if (noticeInfoWithAvgPriceEntityList.size() < 5) {
+            List<VNoticeInfoWithAvgPriceEntity> liteNoticeList =
+                    realtyDao.getNoticesInfoWithAvgPrice(connection, noticeCategoryEntity, false);
+
+            int i = 0;
+        }
+
+        // Теперь нужно заняться поиском в радиусе километра.
+
+        return new ArrayList<>();
+
+    }
+
     public void createOrUpdateAllNoticeIndex(RequestHelper requestHelper) {
 
         Connection connection = requestHelper.getConnection();
@@ -624,7 +644,7 @@ public class RealtyService extends AbstractParser {
                 NoticeCategoryEntity noticeCategoryEntity = toNoticeCategory(titledList, noticeWrapper.getNoticeEntity().getId());
                 noticeCategoryEntity.setCanonTypeNumber(position);
                 noticeCategoryEntity.setRealtyConfigType(ERealtyConfigType.HAKATON_FULL_CONFIG);
-                // noticeCategoryEntity.setSquareValue(noticeWrapper.getNoticeSquare());
+                noticeCategoryEntity.setSquareValue(noticeWrapper.getNoticeSquare());
 
                 realtyDao.saveOrUpdateNoticeCategory(connection, noticeCategoryEntity);
 
@@ -806,6 +826,74 @@ public class RealtyService extends AbstractParser {
             LOGGER.error("", exception);
             throw new RuntimeException("", exception);
         }
+    }
+
+    private HouseEntity findHouseByPreviousValues(Connection connection, String address, HouseDto houseDto, CityEntity cityEntity, Map<String, HouseEntity> houseEntityMap) {
+
+        if (houseEntityMap.containsKey(houseDto.printFullAddr())) {
+            return houseEntityMap.get(houseDto.printFullAddr());
+        }
+
+        // Проверить, есть ли адрес в БД.
+        HouseEntity houseEntity = realtyDao.getHouseByAddress(connection, houseDto.printStreetAddr(), houseDto.getHouseNum(), cityEntity);
+
+        if (houseEntity != null) {
+            houseEntityMap.put(houseDto.printFullAddr(), houseEntity);
+            return houseEntity;
+        }
+
+        List<CommonCoordsDto> commonCoordsDtos = findHouseCoordsByGeocoder(address, houseDto, cityEntity, null);
+
+        if (commonCoordsDtos.isEmpty()) {
+            throw new RuntimeException("Адрес не найден " + address);
+        }
+
+        HouseCoords houseCoords = commonCoordsDtos.get(0).getHouseCoords();
+
+        // Создаём новый дом.
+        houseEntity = realtyConverter.createHouseEntity(houseDto, cityEntity.getId(), 1L, houseCoords);
+
+        try {
+            realtyDao.saveHouse(connection, houseEntity);
+            connection.commit();
+        } catch (SQLException exception) {
+            LOGGER.error("Ошибка при сохранении дома", exception);
+            throw new RuntimeException("Ошибка при сохранении дома", exception);
+        }
+
+        // если дом найден
+        houseEntityMap.put(houseDto.printFullAddr(), houseEntity);
+        return houseEntity;
+    }
+
+    public SimpleResultDto selectStandartObjects(RequestHelper requestHelper, SelectedStandartObjectDto dto) {
+
+        Connection connection = requestHelper.getConnection();
+
+        CityEntity cityEntity = realtyDao.getCityByName(connection, "Москва");
+
+        // Получить выбранные объекты импорта.
+        List<ImportRealtyObjectEntity> standartObjectList = importRealtyDao.getImportRealtyObjectsByIdList(connection, dto.getStandardRecords());
+
+        Map<String, HouseEntity> houseEntityMap = new HashMap<>();
+
+        // Далее нужно найти альтернативы.
+        for (ImportRealtyObjectEntity importRealtyObjectEntity : standartObjectList) {
+            HouseDto houseDto = getHouseAddr(importRealtyObjectEntity.getAddress(), -1);
+
+            if (houseDto.getVillage().exists() && cityEntity.getName().equals(houseDto.getVillage().getName())) {
+                // Не будем писать город второй раз.
+                houseDto.getVillage().setName(null);
+                houseDto.getVillage().setVillageType(null);
+            }
+
+            HouseEntity houseEntity = findHouseByPreviousValues(connection, importRealtyObjectEntity.getAddress(), houseDto, cityEntity, houseEntityMap);
+
+
+            List<NoticeEntity> alternativeList = getAlternatives(connection, importRealtyObjectEntity, houseEntity);
+        }
+
+        return new SimpleResultDto(true);
     }
 
 }

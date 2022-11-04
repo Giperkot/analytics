@@ -80,6 +80,20 @@ public class RealtyDao extends AbstractDao {
         }
     }
 
+    public CityEntity getCityByName(Connection connection, String name) {
+        String sql = "select * from realty.city "
+                + " where name = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, name);
+            ResultSet resultSet = statement.executeQuery();
+
+            return mappingSingleResult(resultSet, CityEntity.class);
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
     public long findFiasVillage(Connection connection, long fiasCityId, String village, EVillageType villageType) {
         String sql = "select id from realty.fias_addr fa"
                 + " where fa.city_id = ? and (lower(fa.off_name) = ? or lower(fa.formal_name) = ?) and fa.shortname = ?";
@@ -312,121 +326,125 @@ public class RealtyDao extends AbstractDao {
 
     public void saveOrUpdateNoticeCategory(Connection connection, NoticeCategoryEntity noticeCategoryEntity) {
         String sql = "insert into realty.notice_category (notice_id, canon_type_number, rooms_count, floor, house_floor, house_type, house_build_year, balcon, classifier_category,"
-                + "realty_segment, repair_type, simple_house_type, total_square, kitchen_square, metro_distance) "
-                + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
+                + "realty_segment, repair_type, simple_house_type, total_square, kitchen_square, metro_distance, square_value) "
+                + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
                 + "    on conflict(notice_id) do update set canon_type_number = ?, rooms_count = ?, floor = ?, house_floor = ?, house_type = ?, "
                 + "                                         house_build_year = ?, balcon = ?, classifier_category = ?, realty_segment = ?, "
-                + "                                         repair_type = ?, simple_house_type = ?, total_square = ?, kitchen_square = ?, metro_distance = ? ";
+                + "                                         repair_type = ?, simple_house_type = ?, total_square = ?, kitchen_square = ?, metro_distance = ?,"
+                + "                                         square_value = ? ";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, noticeCategoryEntity.getNoticeId());
 
             statement.setInt(2, noticeCategoryEntity.getCanonTypeNumber());
-            statement.setInt(16, noticeCategoryEntity.getCanonTypeNumber());
+            statement.setInt(17, noticeCategoryEntity.getCanonTypeNumber());
+
+            statement.setDouble(16, noticeCategoryEntity.getSquareValue());
+            statement.setDouble(31, noticeCategoryEntity.getSquareValue());
 
             if (noticeCategoryEntity.getRoomsCount() == null) {
                 statement.setNull(3, Types.VARCHAR);
-                statement.setNull(17, Types.VARCHAR);
+                statement.setNull(18, Types.VARCHAR);
             } else {
                 statement.setString(3, noticeCategoryEntity.getRoomsCount().getName());
-                statement.setString(17, noticeCategoryEntity.getRoomsCount().getName());
+                statement.setString(18, noticeCategoryEntity.getRoomsCount().getName());
             }
 
             if (noticeCategoryEntity.getFloor() == null) {
                 statement.setNull(4, Types.VARCHAR);
-                statement.setNull(18, Types.VARCHAR);
+                statement.setNull(19, Types.VARCHAR);
             } else {
                 statement.setString(4, noticeCategoryEntity.getFloor().getName());
-                statement.setString(18, noticeCategoryEntity.getFloor().getName());
+                statement.setString(19, noticeCategoryEntity.getFloor().getName());
             }
 
             if (noticeCategoryEntity.getHouseFloor() == null) {
                 statement.setNull(5, Types.VARCHAR);
-                statement.setNull(19, Types.VARCHAR);
+                statement.setNull(20, Types.VARCHAR);
             } else {
                 statement.setString(5, noticeCategoryEntity.getHouseFloor().getName());
-                statement.setString(19, noticeCategoryEntity.getHouseFloor().getName());
+                statement.setString(20, noticeCategoryEntity.getHouseFloor().getName());
             }
 
             if (noticeCategoryEntity.getHouseType() == null) {
                 statement.setNull(6, Types.VARCHAR);
-                statement.setNull(20, Types.VARCHAR);
+                statement.setNull(21, Types.VARCHAR);
             } else {
                 statement.setString(6, noticeCategoryEntity.getHouseType().getName());
-                statement.setString(20, noticeCategoryEntity.getHouseType().getName());
+                statement.setString(21, noticeCategoryEntity.getHouseType().getName());
             }
 
             if (noticeCategoryEntity.getHouseBuildYear() == null) {
                 statement.setNull(7, Types.VARCHAR);
-                statement.setNull(21, Types.VARCHAR);
+                statement.setNull(22, Types.VARCHAR);
             } else {
                 statement.setString(7, noticeCategoryEntity.getHouseBuildYear().getName());
-                statement.setString(21, noticeCategoryEntity.getHouseBuildYear().getName());
+                statement.setString(22, noticeCategoryEntity.getHouseBuildYear().getName());
             }
 
             if (noticeCategoryEntity.getBalcon() == null) {
                 statement.setNull(8, Types.VARCHAR);
-                statement.setNull(22, Types.VARCHAR);
+                statement.setNull(23, Types.VARCHAR);
             } else {
                 statement.setString(8, noticeCategoryEntity.getBalcon().getName());
-                statement.setString(22, noticeCategoryEntity.getBalcon().getName());
+                statement.setString(23, noticeCategoryEntity.getBalcon().getName());
             }
 
             // classifier_category
             if (noticeCategoryEntity.getRealtyConfigType() == null) {
                 statement.setNull(9, Types.VARCHAR);
-                statement.setNull(23, Types.VARCHAR);
+                statement.setNull(24, Types.VARCHAR);
             } else {
                 statement.setString(9, noticeCategoryEntity.getRealtyConfigType().getConfigName());
-                statement.setString(23, noticeCategoryEntity.getRealtyConfigType().getConfigName());
+                statement.setString(24, noticeCategoryEntity.getRealtyConfigType().getConfigName());
             }
 
             if (noticeCategoryEntity.getRealtySegment() == null) {
                 statement.setNull(10, Types.VARCHAR);
-                statement.setNull(24, Types.VARCHAR);
+                statement.setNull(25, Types.VARCHAR);
             } else {
                 statement.setString(10, noticeCategoryEntity.getRealtySegment().getName());
-                statement.setString(24, noticeCategoryEntity.getRealtySegment().getName());
+                statement.setString(25, noticeCategoryEntity.getRealtySegment().getName());
             }
 
             if (noticeCategoryEntity.getRepairType() == null) {
                 statement.setNull(11, Types.VARCHAR);
-                statement.setNull(25, Types.VARCHAR);
+                statement.setNull(26, Types.VARCHAR);
             } else {
                 statement.setString(11, noticeCategoryEntity.getRepairType().getName());
-                statement.setString(25, noticeCategoryEntity.getRepairType().getName());
+                statement.setString(26, noticeCategoryEntity.getRepairType().getName());
             }
 
             if (noticeCategoryEntity.getSimpleHouseType() == null) {
                 statement.setNull(12, Types.VARCHAR);
-                statement.setNull(26, Types.VARCHAR);
+                statement.setNull(27, Types.VARCHAR);
             } else {
                 statement.setString(12, noticeCategoryEntity.getSimpleHouseType().getName());
-                statement.setString(26, noticeCategoryEntity.getSimpleHouseType().getName());
+                statement.setString(27, noticeCategoryEntity.getSimpleHouseType().getName());
             }
 
             if (noticeCategoryEntity.getTotalArea() == null) {
                 statement.setNull(13, Types.VARCHAR);
-                statement.setNull(27, Types.VARCHAR);
+                statement.setNull(28, Types.VARCHAR);
             } else {
                 statement.setString(13, noticeCategoryEntity.getTotalArea().getName());
-                statement.setString(27, noticeCategoryEntity.getTotalArea().getName());
+                statement.setString(28, noticeCategoryEntity.getTotalArea().getName());
             }
 
             if (noticeCategoryEntity.getKitchenArea() == null) {
                 statement.setNull(14, Types.VARCHAR);
-                statement.setNull(28, Types.VARCHAR);
+                statement.setNull(29, Types.VARCHAR);
             } else {
                 statement.setString(14, noticeCategoryEntity.getKitchenArea().getName());
-                statement.setString(28, noticeCategoryEntity.getKitchenArea().getName());
+                statement.setString(29, noticeCategoryEntity.getKitchenArea().getName());
             }
 
             if (noticeCategoryEntity.getMetroDistance() == null) {
                 statement.setNull(15, Types.VARCHAR);
-                statement.setNull(29, Types.VARCHAR);
+                statement.setNull(30, Types.VARCHAR);
             } else {
                 statement.setString(15, noticeCategoryEntity.getMetroDistance().getName());
-                statement.setString(29, noticeCategoryEntity.getMetroDistance().getName());
+                statement.setString(30, noticeCategoryEntity.getMetroDistance().getName());
             }
 
             statement.executeUpdate();
@@ -454,6 +472,108 @@ public class RealtyDao extends AbstractDao {
         } catch (SQLException ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    public List<VNoticeInfoWithAvgPriceEntity> getNoticesInfoWithAvgPrice(Connection connection,
+                                                                          NoticeCategoryEntity noticeCategoryEntity,
+                                                                          boolean strict) {
+
+        String sql = "select * from realty.v_notice_info_with_avg_price";
+        String where = "";
+
+        if (noticeCategoryEntity.getRoomsCount() != null) {
+            where = addWhereCondition(where, true, "rooms_count = ?");
+        }
+        if (noticeCategoryEntity.getFloor() != null && strict) {
+            where = addWhereCondition(where, true, "floor = ?");
+        }
+        if (noticeCategoryEntity.getHouseFloor() != null) {
+            where = addWhereCondition(where, true, "house_floor = ?");
+        }
+        if (noticeCategoryEntity.getHouseType() != null) {
+            where = addWhereCondition(where, true, "house_type = ?");
+        }
+        if (noticeCategoryEntity.getHouseBuildYear() != null) {
+            where = addWhereCondition(where, true, "house_build_year = ?");
+        }
+        if (noticeCategoryEntity.getBalcon() != null && strict) {
+            where = addWhereCondition(where, true, "balcon = ?");
+        }
+        if (noticeCategoryEntity.getRealtyConfigType() != null) {
+            where = addWhereCondition(where, true, "classifier_category = ?");
+        }
+        if (noticeCategoryEntity.getRealtySegment() != null) {
+            where = addWhereCondition(where, true, "realty_segment = ?");
+        }
+        if (noticeCategoryEntity.getRepairType() != null && strict) {
+            where = addWhereCondition(where, true, "repair_type = ?");
+        }
+        if (noticeCategoryEntity.getSimpleHouseType() != null) {
+            where = addWhereCondition(where, true, "simple_house_type = ?");
+        }
+        if (noticeCategoryEntity.getTotalArea() != null && strict) {
+            where = addWhereCondition(where, true, "total_square = ?");
+        }
+        if (noticeCategoryEntity.getKitchenArea() != null && strict) {
+            where = addWhereCondition(where, true, "kitchen_square = ?");
+        }
+        if (noticeCategoryEntity.getMetroDistance() != null && strict) {
+            where = addWhereCondition(where, true, "metro_distance = ?");
+        }
+
+        int idx = 1;
+
+        sql += where;
+        // sql += " order by (sum / square_value - average_sum)";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            if (noticeCategoryEntity.getRoomsCount() != null) {
+                statement.setString(idx++, noticeCategoryEntity.getRoomsCount().getName());
+            }
+            if (noticeCategoryEntity.getFloor() != null && strict) {
+                statement.setString(idx++, noticeCategoryEntity.getFloor().getName());
+            }
+            if (noticeCategoryEntity.getHouseFloor() != null) {
+                statement.setString(idx++, noticeCategoryEntity.getHouseFloor().getName());
+            }
+            if (noticeCategoryEntity.getHouseType() != null) {
+                statement.setString(idx++, noticeCategoryEntity.getHouseType().getName());
+            }
+            if (noticeCategoryEntity.getHouseBuildYear() != null) {
+                statement.setString(idx++, noticeCategoryEntity.getHouseBuildYear().getName());
+            }
+            if (noticeCategoryEntity.getBalcon() != null && strict) {
+                statement.setString(idx++, noticeCategoryEntity.getBalcon().getName());
+            }
+            if (noticeCategoryEntity.getRealtyConfigType() != null) {
+                statement.setString(idx++, noticeCategoryEntity.getRealtyConfigType().getConfigName());
+            }
+            if (noticeCategoryEntity.getRealtySegment() != null) {
+                statement.setString(idx++, noticeCategoryEntity.getRealtySegment().getName());
+            }
+            if (noticeCategoryEntity.getRepairType() != null && strict) {
+                statement.setString(idx++, noticeCategoryEntity.getRepairType().getName());
+            }
+            if (noticeCategoryEntity.getSimpleHouseType() != null) {
+                statement.setString(idx++, noticeCategoryEntity.getSimpleHouseType().getName());
+            }
+            if (noticeCategoryEntity.getTotalArea() != null && strict) {
+                statement.setString(idx++, noticeCategoryEntity.getTotalArea().getName());
+            }
+            if (noticeCategoryEntity.getKitchenArea() != null && strict) {
+                statement.setString(idx++, noticeCategoryEntity.getKitchenArea().getName());
+            }
+            if (noticeCategoryEntity.getMetroDistance() != null && strict) {
+                statement.setString(idx++, noticeCategoryEntity.getMetroDistance().getName());
+            }
+
+            ResultSet resultSet = statement.executeQuery();
+
+            return mappingMultipleResult(resultSet, VNoticeInfoWithAvgPriceEntity.class);
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+
     }
 
     public List<VNoticeInfoWithAvgPriceEntity> getNoticesInfoWithAvgPrice(Connection connection, long[] districtIdArr,
@@ -684,5 +804,7 @@ public class RealtyDao extends AbstractDao {
             throw new RuntimeException(ex);
         }
     }
+
+
 
 }

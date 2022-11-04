@@ -53,6 +53,18 @@ public enum EHouseFloor implements ITitled {
         throw new RuntimeException("Нет такого id");
     }
 
+    public static EHouseFloor getByHouseFloor(int houseFloor) {
+        if (houseFloor < 4) {
+            return EHouseFloor.LOW_FLOORS;
+        }
+
+        if (houseFloor <= 5) {
+            return EHouseFloor.FIVE_OR_LESS;
+        }
+
+        return EHouseFloor.MORE_THAN_FIVE;
+    }
+
     public static EHouseFloor[] getValues() {
         return values;
     }

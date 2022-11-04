@@ -56,6 +56,9 @@ public class NoticeCategoryEntity extends BaseEntity {
     @Column(name = "metro_distance")
     private EMetroDistance metroDistance;
 
+    @Column(name = "square_value")
+    private double squareValue;
+
     public long getNoticeId() {
         return noticeId;
     }
@@ -174,5 +177,13 @@ public class NoticeCategoryEntity extends BaseEntity {
 
     public void setMetroDistance(EMetroDistance metroDistance) {
         this.metroDistance = metroDistance;
+    }
+
+    public double getSquareValue() {
+        return squareValue;
+    }
+
+    public void setSquareValue(double squareValue) {
+        this.squareValue = squareValue;
     }
 }

@@ -29,7 +29,9 @@
                 }
 
                 self.temp.selection = {};
+                self.temp.multiSelection = [];
                 self.idField = self.properties.idField || "id";
+                self.multiSelect = self.properties.multiSelect || false;
 
                 self.model.idField = self.idField;
             },
@@ -91,7 +93,11 @@
                     this.temp.selection = this.model.gridData[0];
                 }
 
-                return this.temp.selection;
+                if (this.multiSelect) {
+                    return this.temp.multiSelection;
+                } else {
+                    return this.temp.selection;
+                }
             },
             setGridData: function (gridData) {
                 this.model.gridData = gridData;
@@ -104,19 +110,32 @@
             },
             onDelete: function (record) {
                 throw new Error('onDelete не реализован');
-            }
-        },
-        events: {
-            click: function (e) {
-                var target = e.target;
-                let tableLine = target.closest("tr");
+            },
+            handleMultiModeClick: function (tableLine) {
+                let self = this;
+                let selectedId = tableLine.getAttribute("data-id");
 
-                if (!tableLine || tableLine.classList.contains("header_row")) {
-                    // Проверить кнопки управления таблицей
-                    this.checkControlButtons(e);
-                    return;
+                if (tableLine.classList.contains("selected")) {
+                    for (let i = 0; i < self.temp.multiSelection.length; i++) {
+                        if (selectedId == self.temp.multiSelection[i][self.idField]) {
+                            self.temp.multiSelection.splice(i, 1);
+                            break;
+                        }
+                    }
+
+                    tableLine.classList.remove("selected");
+                } else {
+                    for (let i = 0; i < self.model.gridData.length; i++) {
+                        if (selectedId == self.model.gridData[i][self.idField]) {
+                            self.temp.multiSelection.push(self.model.gridData[i]);
+                            break;
+                        }
+                    }
+
+                    tableLine.classList.add("selected");
                 }
-
+            },
+            handleSingleModeClick: function (tableLine) {
                 let selectedRowList = this.containerElm.querySelectorAll(".selected");
 
                 for(let i = 0; i < selectedRowList.length; i++) {
@@ -149,6 +168,26 @@
                         }
                     }
                 }
+            },
+        },
+        events: {
+            click: function (e) {
+                var target = e.target;
+                let tableLine = target.closest("tr");
+
+                if (!tableLine || tableLine.classList.contains("header_row")) {
+                    // Проверить кнопки управления таблицей
+                    this.checkControlButtons(e);
+                    return;
+                }
+
+                if (this.multiSelect) {
+                    this.handleMultiModeClick(tableLine);
+                } else {
+                    this.handleSingleModeClick(tableLine);
+                }
+
+
 
             }
     }});

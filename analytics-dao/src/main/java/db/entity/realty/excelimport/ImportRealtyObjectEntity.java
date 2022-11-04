@@ -7,6 +7,7 @@ import db.entity.BaseEntity;
 import enums.report.EBalconParam;
 import enums.report.ERealtySegment;
 import enums.report.ERepairType;
+import enums.report.ERoomsCount;
 import enums.report.ESimpleHouseType;
 
 @Entity
@@ -20,7 +21,7 @@ public class ImportRealtyObjectEntity extends BaseEntity {
     private String address;
 
     @Column(name = "rooms_count")
-    private int roomsCount;
+    private ERoomsCount roomsCount;
 
     @Column(name = "realty_segment")
     private ERealtySegment realtySegment;
@@ -65,11 +66,11 @@ public class ImportRealtyObjectEntity extends BaseEntity {
         this.address = address;
     }
 
-    public int getRoomsCount() {
+    public ERoomsCount getRoomsCount() {
         return roomsCount;
     }
 
-    public void setRoomsCount(int roomsCount) {
+    public void setRoomsCount(ERoomsCount roomsCount) {
         this.roomsCount = roomsCount;
     }
 

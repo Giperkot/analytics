@@ -103,7 +103,7 @@ public class ReportService {
         }
 
         if (realtyConfigurationDto.isTotalSquare()) {
-            reportClassifier.addClassParam(new TotalSquareParam());
+            reportClassifier.addClassParam(new TotalAreaClassParam());
         }
 
         if (realtyConfigurationDto.isMetroDistance()) {

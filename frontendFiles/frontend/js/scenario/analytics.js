@@ -354,10 +354,12 @@
               },
               events: {
                 onLoadFile: function () {
+                  let self = this;
                   let fileUploader = cmpCore.findByName("realtyImportUploader");
 
                   let formData = fileUploader.getFormData();
 
+                  //todo Тут бы ещё loader поставить...
                   helper.getHttpPromise({
                     method: "POST",
                     url: "/api/import/readExcel",
@@ -365,10 +367,18 @@
                   }).then(function (response) {
                     var ans = JSON.parse(response);
 
+                    fileUploader.hide();
+
                     let resultTable = cmpCore.findByName("resultTable");
+                    let importPage = cmpCore.findByName("import");
+
                     resultTable.setGridData(ans.importExcelRealtyDtoList);
                     resultTable.render(resultTable.rootElm.containerElm);
-                    resultTable.bind();
+
+                    let continueRow = fileUploader.parent.containerElm.querySelector(".continue_row");
+                    continueRow.classList.remove("hidden");
+
+                    importPage.temp.requestId = ans.requestId;
                   });
 
                 }
@@ -378,10 +388,10 @@
               type: "CTableSelector",
               container: ".realty_result_table",
               properties: {
-                hidden: true
+                multiSelect: true
               },
               model: {
-                labelText: "Список загруженных объектов",
+                labelText: "Выберите эталонные объекты",
                 columns: [
                   {
                     label: "Адрес",
@@ -422,6 +432,49 @@
                   add: false,
                   edit: false,
                   delete: false
+                }
+              }
+            }, {
+              name: "continueBtn",
+              type: "CSendButton",
+              container: ".continue_btn",
+              /*properties: {
+                hidden: false
+              },*/
+              model: {
+                buttonText: "Продолжить"
+              },
+              events: {
+                click: function (evt) {
+                  let self = this;
+                  let resultTable = cmpCore.findByName("resultTable");
+                  let importPage = cmpCore.findByName("import");
+
+                  let standardRecords = resultTable.getValue();
+
+                  let idArr = standardRecords.map(function (elm) {
+                    return elm.id;
+                  });
+
+                  console.log(standardRecords);
+
+                  let data = {
+                    requestId: importPage.temp.requestId,
+                    standardRecords: idArr
+                  }
+                  console.log(JSON.stringify(data));
+
+                  //todo Тут бы ещё loader поставить...
+                  helper.getHttpPromise({
+                    method: "POST",
+                    url: "/api/realty/selectStandartObjects",
+                    jsonData: data
+                  }).then(function (response) {
+                    var ans = JSON.parse(response);
+
+                    console.log(ans);
+                  });
+
                 }
               }
             }

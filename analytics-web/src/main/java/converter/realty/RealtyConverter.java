@@ -1,11 +1,20 @@
 package converter.realty;
 
+import db.entity.realty.HouseEntity;
+import db.entity.realty.NoticeCategoryEntity;
+import db.entity.realty.excelimport.ImportRealtyObjectEntity;
+import dto.geocode.yandex.BoundedByDto;
 import dto.geocode.yandex.GeoObject;
+import dto.geocode.yandex.PointDto;
 import dto.realty.BoundsDto;
 import dto.realty.CoordPoint;
 import dto.realty.HouseCoords;
-import dto.geocode.yandex.BoundedByDto;
-import dto.geocode.yandex.PointDto;
+import dto.realty.HouseDto;
+import enums.report.EFloor;
+import enums.report.EHouseFloor;
+import enums.report.EKitchenArea;
+import enums.report.EMetroDistance;
+import enums.report.ETotalArea;
 
 public class RealtyConverter {
     private static final RealtyConverter instance = new RealtyConverter();
@@ -57,6 +66,39 @@ public class RealtyConverter {
         result.setBound(toBoundsDto(boundedBy));
 
         return result;
+    }
+
+    public HouseEntity createHouseEntity(HouseDto houseDto, long cityId, long districtId, HouseCoords houseCoords) {
+        HouseEntity houseEntity = new HouseEntity();
+        houseEntity.setHouseNum(houseDto.getHouseNum());
+        houseEntity.setCityId(cityId);
+        houseEntity.setStreet(houseDto.printStreetAddr());
+        houseEntity.setDistrictId(districtId);
+        houseEntity.setCoords(houseCoords);
+
+        return houseEntity;
+    }
+
+    public NoticeCategoryEntity toNoticeCategoryEntity(ImportRealtyObjectEntity importRealtyObjectEntity) {
+
+        NoticeCategoryEntity noticeCategoryEntity = new NoticeCategoryEntity();
+
+        noticeCategoryEntity.setRoomsCount(importRealtyObjectEntity.getRoomsCount());
+        noticeCategoryEntity.setFloor(
+                EFloor.getByFloorAndHouseFloor(importRealtyObjectEntity.getFloor(), importRealtyObjectEntity.getHouseFloorsCount()));
+        noticeCategoryEntity.setHouseFloor(EHouseFloor.getByHouseFloor(importRealtyObjectEntity.getHouseFloorsCount()));
+        // noticeCategoryEntity.setHouseType();
+        noticeCategoryEntity.setBalcon(importRealtyObjectEntity.getBalcon());
+        //
+        noticeCategoryEntity.setRealtySegment(importRealtyObjectEntity.getRealtySegment());
+        noticeCategoryEntity.setRepairType(importRealtyObjectEntity.getRepairType());
+        noticeCategoryEntity.setSimpleHouseType(importRealtyObjectEntity.getWallMaterial());
+        noticeCategoryEntity.setTotalArea(ETotalArea.getByArea(importRealtyObjectEntity.getTotalArea()));
+        noticeCategoryEntity.setKitchenArea(EKitchenArea.getByArea(importRealtyObjectEntity.getKitchenArea()));
+        noticeCategoryEntity.setMetroDistance(EMetroDistance.fromDistance(importRealtyObjectEntity.getMetroDistance()));
+
+        return noticeCategoryEntity;
+
     }
 
 }

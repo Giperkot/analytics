@@ -21,15 +21,7 @@ public class HouseFloorClassParam implements IClassParam {
 
         int val = Integer.parseInt(houseFloorFeature.getValue());
 
-        if (val < 4) {
-            return EHouseFloor.LOW_FLOORS.getId();
-        }
-
-        if (val <= 5) {
-            return EHouseFloor.FIVE_OR_LESS.getId();
-        }
-
-        return EHouseFloor.MORE_THAN_FIVE.getId();
+        return EHouseFloor.getByHouseFloor(val).getId();
     }
 
     @Override

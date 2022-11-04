@@ -11,7 +11,7 @@ public class ImportExcelRealtyDto {
 
     private String address;
 
-    private int roomsCount;
+    private String roomsCount;
 
     /**
      * Новостройка, современное жилье, старый жилой фонд
@@ -55,11 +55,11 @@ public class ImportExcelRealtyDto {
         this.address = address;
     }
 
-    public int getRoomsCount() {
+    public String getRoomsCount() {
         return roomsCount;
     }
 
-    public void setRoomsCount(int roomsCount) {
+    public void setRoomsCount(String roomsCount) {
         this.roomsCount = roomsCount;
     }
 

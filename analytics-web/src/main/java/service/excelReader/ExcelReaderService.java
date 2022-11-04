@@ -114,8 +114,13 @@ public class ExcelReaderService {
             }
             if (row.getCell(1).getCellType() == CellType.NUMERIC) {
                 int rooms = (int) row.getCell(1).getNumericCellValue();
+                excelRealtyDto.setRoomsCount(String.valueOf(rooms));
+            }
+            if (row.getCell(1).getCellType() == CellType.STRING) {
+                String rooms = row.getCell(1).getStringCellValue();
                 excelRealtyDto.setRoomsCount(rooms);
             }
+
             if (row.getCell(2).getCellType() == CellType.STRING) {
                 String buildingType = row.getCell(2).getStringCellValue();
                 excelRealtyDto.setRealtySegment(ERealtySegment.getByTitle(buildingType));

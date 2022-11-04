@@ -402,6 +402,13 @@ create or replace view realty.v_notice_info_with_avg_price as(
         nc.house_type,
         nc.house_build_year,
         nc.balcon,
+        nc.classifier_category,
+        nc.realty_segment,
+        nc.repair_type,
+        nc.simple_house_type,
+        nc.total_square,
+        nc.kitchen_square,
+        nc.metro_distance,
         d.id as district_id
     from parser.notice n
         join parser.parse_task pt on n.parse_task_id = pt.id
@@ -464,7 +471,7 @@ create table realty.import_realty_object(
     import_excel_request_id bigint not null
         references realty.import_realty_request(id),
     address text not null,
-    rooms_count int not null,
+    rooms_count varchar(255) not null,
     realty_segment varchar(255) not null,
     house_floors_count int not null,
     wall_material varchar(255) not null,
@@ -477,9 +484,6 @@ create table realty.import_realty_object(
 );
 
 drop view realty.v_notice_info_with_avg_price;
-
-alter table realty.notice_category
-    drop column square_value;
 
 alter table realty.notice_category
     add column classifier_category varchar(255) not null,

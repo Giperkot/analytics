@@ -5,6 +5,7 @@ import dto.common.SimpleResultDto;
 import dto.realty.FullDistrictDto;
 import dto.realty.NoticeInfoFilter;
 import dto.realty.VNoticeInfoWithAvgPriceDto;
+import dto.realty.standart.SelectedStandartObjectDto;
 import service.realty.RealtyService;
 
 import javax.ws.rs.POST;
@@ -33,6 +34,12 @@ public class RealtyController {
     @Path("deleteDistrictById")
     public SimpleResultDto deleteDistrictById(RequestHelper requestHelper, @QueryParam("id") String districtId) {
         return realtyService.deleteDistrictById(requestHelper, Long.parseLong(districtId));
+    }
+
+    @POST
+    @Path("selectStandartObjects")
+    public SimpleResultDto selectStandartObjects(RequestHelper requestHelper, SelectedStandartObjectDto dto) {
+        return realtyService.selectStandartObjects(requestHelper, dto);
     }
 
 

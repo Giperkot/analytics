@@ -48,7 +48,7 @@ public class ImportRealtyDao extends AbstractDao {
             for (ImportRealtyObjectEntity entity : ImportRealtyObjectEntity) {
                 objStatement.setLong(1, importRequestId);
                 objStatement.setString(2, entity.getAddress());
-                objStatement.setInt(3, entity.getRoomsCount());
+                objStatement.setString(3, entity.getRoomsCount().getName());
                 objStatement.setString(4, entity.getRealtySegment().getName());
                 objStatement.setInt(5, entity.getHouseFloorsCount());
                 objStatement.setString(6, entity.getWallMaterial().getName());
@@ -74,6 +74,25 @@ public class ImportRealtyDao extends AbstractDao {
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, requestId);
+            ResultSet resultSet = statement.executeQuery();
+
+            return mappingMultipleResult(resultSet, ImportRealtyObjectEntity.class);
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public List<ImportRealtyObjectEntity>  getImportRealtyObjectsByIdList(Connection connection, long[] ids) {
+        String sql = "select * from realty.import_realty_object "
+                + " where id = any(?)";
+
+        Long[] idArr = new Long[ids.length];
+        for (int i = 0; i < ids.length; i++) {
+            idArr[i] = ids[i];
+        }
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setArray(1, connection.createArrayOf("bigint", idArr));
             ResultSet resultSet = statement.executeQuery();
 
             return mappingMultipleResult(resultSet, ImportRealtyObjectEntity.class);
