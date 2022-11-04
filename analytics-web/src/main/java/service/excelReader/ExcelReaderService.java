@@ -8,6 +8,7 @@ import db.entity.realty.excelimport.ImportRealtyObjectEntity;
 import db.entity.realty.excelimport.ImportRealtyRequestEntity;
 import dto.realty.excelimport.ImportExcelRealtyDto;
 import dto.realty.excelimport.ImportResponseDto;
+import dto.realty.excelimport.ShowImportExcelRealtyDto;
 import enums.report.EBalconParam;
 import enums.report.ERealtySegment;
 import enums.report.ERepairType;
@@ -97,6 +98,7 @@ public class ExcelReaderService {
         }
 
         List<ImportRealtyObjectEntity> realtyObjectEntityList = new ArrayList<>();
+        List<ShowImportExcelRealtyDto> excelRealtyDtoToShowList = new ArrayList<>();
 
         // todo Нужно сделать валидацию.
         for (int i = firstIdx + 1; ; i++) {
@@ -107,53 +109,66 @@ public class ExcelReaderService {
             }
 
             ImportExcelRealtyDto excelRealtyDto = new ImportExcelRealtyDto();
+            ShowImportExcelRealtyDto excelRealtyDtoToShow = new ShowImportExcelRealtyDto();
 
             if (row.getCell(0).getCellType() == CellType.STRING) {
                 String location = row.getCell(0).getStringCellValue();
                 excelRealtyDto.setAddress(location);
+                excelRealtyDtoToShow.setAddress(location);
             }
             if (row.getCell(1).getCellType() == CellType.NUMERIC) {
                 int rooms = (int) row.getCell(1).getNumericCellValue();
                 excelRealtyDto.setRoomsCount(rooms);
+                excelRealtyDtoToShow.setRoomsCount(rooms);
             }
             if (row.getCell(2).getCellType() == CellType.STRING) {
                 String buildingType = row.getCell(2).getStringCellValue();
                 excelRealtyDto.setRealtySegment(ERealtySegment.getByTitle(buildingType));
+                excelRealtyDtoToShow.setRealtySegment(buildingType);
             }
             if (row.getCell(3).getCellType() == CellType.NUMERIC) {
                 int floorsInBuilding = (int) row.getCell(3).getNumericCellValue();
                 excelRealtyDto.setHouseFloorsCount(floorsInBuilding);
+                excelRealtyDtoToShow.setHouseFloorsCount(floorsInBuilding);
             }
             if (row.getCell(4).getCellType() == CellType.STRING) {
                 String wallsMaterial = row.getCell(4).getStringCellValue();
                 excelRealtyDto.setWallMaterial(ESimpleHouseType.getByTitle(wallsMaterial));
+                excelRealtyDtoToShow.setWallMaterial(wallsMaterial);
             }
             if (row.getCell(5).getCellType() == CellType.NUMERIC) {
                 int floor = (int) row.getCell(5).getNumericCellValue();
                 excelRealtyDto.setFloor(floor);
+                excelRealtyDtoToShow.setFloor(floor);
             }
             if (row.getCell(6).getCellType() == CellType.NUMERIC) {
                 double apartmentArea = row.getCell(6).getNumericCellValue();
                 excelRealtyDto.setTotalArea(apartmentArea);
+                excelRealtyDtoToShow.setTotalArea(apartmentArea);
             }
             if (row.getCell(7).getCellType() == CellType.NUMERIC) {
                 double kitchenArea = (float) row.getCell(7).getNumericCellValue();
                 excelRealtyDto.setKitchenArea(kitchenArea);
+                excelRealtyDtoToShow.setKitchenArea(kitchenArea);
             }
             if (row.getCell(8).getCellType() == CellType.STRING) {
                 String balcony = row.getCell(8).getStringCellValue();
                 excelRealtyDto.setBalcon(EBalconParam.getByTitle(balcony));
+                excelRealtyDtoToShow.setBalcon(balcony);
             }
             if (row.getCell(9).getCellType() == CellType.NUMERIC) {
                 int distanceToMetro = (int) row.getCell(9).getNumericCellValue();
                 excelRealtyDto.setMetroDistance(distanceToMetro);
+                excelRealtyDtoToShow.setMetroDistance(distanceToMetro);
             }
             if (row.getCell(10).getCellType() == CellType.STRING) {
                 String condition = row.getCell(10).getStringCellValue();
                 excelRealtyDto.setRepairType(ERepairType.getByTitle(condition));
+                excelRealtyDtoToShow.setRepairType(condition);
             }
 
             realtyObjectEntityList.add(importMapper.toImportRealtyObjectEntity(excelRealtyDto));
+            excelRealtyDtoToShowList.add(excelRealtyDtoToShow);
         }
 
         ImportRealtyRequestEntity importRealtyRequestEntity = new ImportRealtyRequestEntity();
@@ -165,21 +180,14 @@ public class ExcelReaderService {
         try {
             // Сохранить это в БД.
             importRealtyDao.saveImportRealtyRequest(connection, importRealtyRequestEntity, realtyObjectEntityList);
-
-            realtyObjectEntityList = importRealtyDao.getImportRealtyObjectsByRequest(connection, importRealtyRequestEntity.getId());
-
             connection.commit();
         } catch (SQLException exception) {
             LOGGER.error("Ошибка при сохранении запроса на импорт", exception);
             throw new RuntimeException("Ошибка при сохранении запроса на импорт", exception);
         }
 
-        List<ImportExcelRealtyDto> realtyDtoList = realtyObjectEntityList.stream()
-                                                                         .map((elm) -> importMapper.toImportExcelRealtyDto(elm))
-                                                                         .collect(Collectors.toList());
-
         ImportResponseDto importResponseDto = new ImportResponseDto();
-        importResponseDto.setImportExcelRealtyDtoList(realtyDtoList);
+        importResponseDto.setImportExcelRealtyDtoList(excelRealtyDtoToShowList);
         importResponseDto.setRequestId(importRealtyRequestEntity.getId());
 
         return importResponseDto;
