@@ -6,8 +6,9 @@ import interfaces.report.ITitled;
 @EnumMethodDataBase(fromDbName = "fromString")
 public enum EFloor implements ITitled {
 
-    FIRST_OR_LAST(0, "Первый или последний этаж", "FIRST_OR_LAST"),
-    AVERAGE(1, "Средние этажи", "AVERAGE");
+    FIRST(0, "Первый или последний этаж", "FIRST"),
+    AVERAGE(1, "Средние этажи", "AVERAGE"),
+    LAST(2, "Последний этаж", "LAST");
 
     private static EFloor[] values = values();
 
@@ -53,8 +54,12 @@ public enum EFloor implements ITitled {
     }
 
     public static EFloor getByFloorAndHouseFloor(int floor, int houseFloor) {
-        if (floor == houseFloor || floor == 1) {
-            return EFloor.FIRST_OR_LAST;
+        if (floor == houseFloor) {
+            return EFloor.LAST;
+        }
+
+        if (floor == 1) {
+            return EFloor.FIRST;
         }
 
         return EFloor.AVERAGE;

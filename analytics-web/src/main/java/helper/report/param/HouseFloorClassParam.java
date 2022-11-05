@@ -9,19 +9,34 @@ import interfaces.report.ITitled;
 
 public class HouseFloorClassParam implements IClassParam {
 
+    private static final HouseFloorClassParam instance = new HouseFloorClassParam();
 
-    @Override
-    public int getOrderByValue(NoticeWrapper value) {
+    public static HouseFloorClassParam getInstance() {
+        return instance;
+    }
 
+    private HouseFloorClassParam() {
+    }
+
+    public int getFloorValue(NoticeWrapper value) {
         VFeatureValueEntity houseFloorFeature = value.getFeatureByExactName(EFeatureExactName.HOUSE_FLOORS);
 
         if (houseFloorFeature == null) {
             throw new RuntimeException("Отсутствует количество этажей в доме: noticeId: " + value.getNoticeEntity().getId());
         }
 
-        int val = Integer.parseInt(houseFloorFeature.getValue());
+        return Integer.parseInt(houseFloorFeature.getValue());
+    }
 
-        return EHouseFloor.getByHouseFloor(val).getId();
+    public EHouseFloor getHouseFloor(NoticeWrapper value) {
+        int val = getFloorValue(value);
+
+        return EHouseFloor.getByHouseFloor(val);
+    }
+
+    @Override
+    public int getOrderByValue(NoticeWrapper value) {
+        return getHouseFloor(value).getId();
     }
 
     @Override

@@ -8,13 +8,25 @@ import helper.report.IClassParam;
 import interfaces.report.ITitled;
 
 public class TotalAreaClassParam implements IClassParam {
-    @Override
-    public int getOrderByValue(NoticeWrapper value) {
 
+    private static final TotalAreaClassParam instance = new TotalAreaClassParam();
+
+    public static TotalAreaClassParam getInstance() {
+        return instance;
+    }
+
+    private TotalAreaClassParam() {
+    }
+
+    public double getTotalArea(NoticeWrapper value) {
         VFeatureValueEntity totalAreaFeature = value.getFeatureByExactName(EFeatureExactName.TOTAL_AREA);
 
-        double totalArea = Double.parseDouble(totalAreaFeature.getValue());
+        return Double.parseDouble(totalAreaFeature.getValue());
+    }
 
+    @Override
+    public int getOrderByValue(NoticeWrapper value) {
+        double totalArea = getTotalArea(value);
         return ETotalArea.getByArea(totalArea).getId();
     }
 

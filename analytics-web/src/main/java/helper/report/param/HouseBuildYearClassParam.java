@@ -8,6 +8,16 @@ import helper.report.IClassParam;
 import interfaces.report.ITitled;
 
 public class HouseBuildYearClassParam implements IClassParam {
+
+    private static final HouseBuildYearClassParam instance = new HouseBuildYearClassParam();
+
+    public static HouseBuildYearClassParam getInstance() {
+        return instance;
+    }
+
+    private HouseBuildYearClassParam() {
+    }
+    
     @Override
     public int getOrderByValue(NoticeWrapper value) {
 

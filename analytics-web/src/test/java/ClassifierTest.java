@@ -39,8 +39,8 @@ public class ClassifierTest {
         PlacementClassParam placementClassParam = new PlacementClassParam(shortDistrictEntityList);
 
         reportClassifier.addClassParam(placementClassParam);
-        reportClassifier.addClassParam(new FloorClassParam());
-        reportClassifier.addClassParam(new HouseFloorClassParam());
+        reportClassifier.addClassParam(FloorClassParam.getInstance());
+        reportClassifier.addClassParam(HouseFloorClassParam.getInstance());
 
         // Объявление.
         VFeatureValueEntity feat1 = new VFeatureValueEntity();

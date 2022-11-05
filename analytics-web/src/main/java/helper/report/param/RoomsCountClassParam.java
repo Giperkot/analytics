@@ -8,10 +8,17 @@ import helper.report.IClassParam;
 import interfaces.report.ITitled;
 
 public class RoomsCountClassParam implements IClassParam {
-    @Override
-    public int getOrderByValue(NoticeWrapper value) {
-        // ERoomsCount
 
+    private static final RoomsCountClassParam instance = new RoomsCountClassParam();
+
+    public static RoomsCountClassParam getInstance() {
+        return instance;
+    }
+
+    private RoomsCountClassParam() {
+    }
+
+    public ERoomsCount getRoomsCount(NoticeWrapper value) {
         VFeatureValueEntity roomsCountFeature = value.getFeatureByExactName(EFeatureExactName.ROOM_COUNT);
 
         if (roomsCountFeature == null) {
@@ -19,11 +26,16 @@ public class RoomsCountClassParam implements IClassParam {
         }
 
         try {
-            return ERoomsCount.getByRoomsCount(roomsCountFeature.getValue()).getId();
+            return ERoomsCount.getByRoomsCount(roomsCountFeature.getValue());
         }catch (Exception ex) {
             throw new RuntimeException("Неверный формат числа: " + roomsCountFeature.getValue() +
                                                " noticeId: " + value.getNoticeEntity().getId(), ex);
         }
+    }
+
+    @Override
+    public int getOrderByValue(NoticeWrapper value) {
+        return getRoomsCount(value).getId();
     }
 
     @Override

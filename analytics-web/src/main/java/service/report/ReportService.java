@@ -67,51 +67,51 @@ public class ReportService {
         }
 
         if (realtyConfigurationDto.isFloor()) {
-            reportClassifier.addClassParam(new FloorClassParam());
+            reportClassifier.addClassParam(FloorClassParam.getInstance());
         }
 
         if (realtyConfigurationDto.isHouseFloor()) {
-            reportClassifier.addClassParam(new HouseFloorClassParam());
+            reportClassifier.addClassParam(HouseFloorClassParam.getInstance());
         }
 
         if (realtyConfigurationDto.isKitchenSquare()) {
-            reportClassifier.addClassParam(new KitchenAreaClassParam());
+            reportClassifier.addClassParam(KitchenAreaClassParam.getInstance());
         }
 
         if (realtyConfigurationDto.isBalcon()) {
-            reportClassifier.addClassParam(new BalconClassParam());
+            reportClassifier.addClassParam(BalconClassParam.getInstance());
         }
 
         if (realtyConfigurationDto.isRoomsCount()) {
-            reportClassifier.addClassParam(new RoomsCountClassParam());
+            reportClassifier.addClassParam(RoomsCountClassParam.getInstance());
         }
 
         if (realtyConfigurationDto.isHouseType()) {
-            reportClassifier.addClassParam(new HouseTypeClassParam());
+            reportClassifier.addClassParam(HouseTypeClassParam.getInstance());
         }
 
         if (realtyConfigurationDto.isHouseBuildYear()) {
-            reportClassifier.addClassParam(new HouseBuildYearClassParam());
+            reportClassifier.addClassParam(HouseBuildYearClassParam.getInstance());
         }
 
         if (realtyConfigurationDto.isRealtySegment()) {
-            reportClassifier.addClassParam(new RealtySegmentParam());
+            reportClassifier.addClassParam(RealtySegmentParam.getInstance());
         }
 
         if (realtyConfigurationDto.isSimpleHouseType()) {
-            reportClassifier.addClassParam(new SimpleHouseTypeParam());
+            reportClassifier.addClassParam(SimpleHouseTypeParam.getInstance());
         }
 
         if (realtyConfigurationDto.isTotalSquare()) {
-            reportClassifier.addClassParam(new TotalAreaClassParam());
+            reportClassifier.addClassParam(TotalAreaClassParam.getInstance());
         }
 
         if (realtyConfigurationDto.isMetroDistance()) {
-            reportClassifier.addClassParam(new MetroDistanceClassParam());
+            reportClassifier.addClassParam(MetroDistanceClassParam.getInstance());
         }
 
         if (realtyConfigurationDto.isRepairType()) {
-            reportClassifier.addClassParam(new RepairTypeClassParam());
+            reportClassifier.addClassParam(RepairTypeClassParam.getInstance());
         }
 
         return reportClassifier;
@@ -146,6 +146,12 @@ public class ReportService {
 
     public List<NoticeWrapper> getAllActiveNotices(Connection connection) {
         List<VDistrictNoticeEntity> activeNoticeList = parserDao.getActiveNotices(connection);
+
+        return getAllNoticesInfoByList(connection, activeNoticeList);
+    }
+
+    public List<NoticeWrapper> getNoticesByIdList(Connection connection, Long[] noticeIdList) {
+        List<VDistrictNoticeEntity> activeNoticeList = parserDao.getNoticesByIdList(connection, noticeIdList);
 
         return getAllNoticesInfoByList(connection, activeNoticeList);
     }

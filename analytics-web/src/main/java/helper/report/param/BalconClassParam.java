@@ -8,11 +8,25 @@ import helper.report.IClassParam;
 import interfaces.report.ITitled;
 
 public class BalconClassParam implements IClassParam {
+
+    private static final BalconClassParam instance = new BalconClassParam();
+
+    public static BalconClassParam getInstance() {
+        return instance;
+    }
+
+    private BalconClassParam() {
+    }
+
+    public EBalconParam getBalcon(NoticeWrapper value) {
+        VFeatureValueEntity featureValueEntity = value.getFeatureByExactName(EFeatureExactName.BALCON_LOGGIA);
+        return (featureValueEntity != null && "true".equals(featureValueEntity.getValue()))
+                ? EBalconParam.TRUE : EBalconParam.FALSE;
+    }
+
     @Override
     public int getOrderByValue(NoticeWrapper value) {
-        VFeatureValueEntity featureValueEntity = value.getFeatureByExactName(EFeatureExactName.BALCON_LOGGIA);
-        EBalconParam balconParam = (featureValueEntity != null && "true".equals(featureValueEntity.getValue()))
-                ? EBalconParam.TRUE : EBalconParam.FALSE;
+        EBalconParam balconParam = getBalcon(value);
 
         return balconParam.getId();
     }

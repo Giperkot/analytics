@@ -1,6 +1,7 @@
 package service.realty;
 
 import common.CommonUtils;
+import converter.realty.ImportMapper;
 import converter.realty.RealtyConverter;
 import converter.realty.RealtyMapper;
 import converter.realty.RealtyMapperImpl;
@@ -8,8 +9,8 @@ import core.rest.RequestHelper;
 import dao.parser.ParserDao;
 import dao.realty.RealtyDao;
 import dao.realty.excelimport.ImportRealtyDao;
-import db.entity.parser.NoticeEntity;
 import db.entity.parser.view.VNoticeEntity;
+import db.entity.realty.AdjustCoeffsEntity;
 import db.entity.realty.CityEntity;
 import db.entity.realty.DistrictEntity;
 import db.entity.realty.HouseAddInfoEntity;
@@ -22,6 +23,9 @@ import db.entity.realty.view.VNoticeInfoWithAvgPriceEntity;
 import dto.common.SimpleResultDto;
 import dto.geocode.CommonCoordsDto;
 import dto.realty.*;
+import dto.realty.excelimport.ImportExcelRealtyDto;
+import dto.realty.excelimport.standart.AdjustmentImportRealtyWrapDto;
+import dto.realty.excelimport.standart.EvalutionStandartObjDto;
 import dto.realty.standart.SelectedStandartObjectDto;
 import dto.report.NoticeWrapper;
 import dto.report.RealtyConfigurationDto;
@@ -43,6 +47,7 @@ import repository.geocoder.GeocodeHttpRepository;
 import repository.geocoder.IGeocoder;
 import repository.geocoder.yandex.YandexHttpRepository;
 import service.AbstractParser;
+import service.excelReader.ExcelReaderService;
 import service.realty.catalog.IRealtyCatalogService;
 import service.realty.catalog.RealtyCatalogService;
 import service.report.ReportService;
@@ -53,6 +58,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class RealtyService extends AbstractParser {
@@ -78,7 +84,24 @@ public class RealtyService extends AbstractParser {
 
     private final RealtyMapper realtyMapper = new RealtyMapperImpl();
 
+    private final ImportMapper importMapper = ExcelReaderService.getInstance().getImportMapper();
+
+    private final Map<String, AdjustCoeffsEntity> adjustCoeffDictMap = new ConcurrentHashMap<>();
+
     private RealtyService() {
+    }
+
+    private String createAdjustCoeffKey(String type, String paramFrom, String paramTo) {
+        return type + "_" + paramFrom + "_" + paramTo;
+    }
+
+    public void initializeAdjustCoeffDictMap(Connection connection) {
+        List<AdjustCoeffsEntity>  adjustCoeffsEntityList = realtyDao.getAdjustCoeffList(connection);
+
+        for (AdjustCoeffsEntity entity : adjustCoeffsEntityList) {
+            String key = createAdjustCoeffKey(entity.getType().getName(), entity.getFromParametr(), entity.getToParameter());
+            adjustCoeffDictMap.put(key, entity);
+        }
     }
 
     private List<DistrictWrapper> getDistrictTree(Connection connection, long cityId) {
@@ -601,7 +624,7 @@ public class RealtyService extends AbstractParser {
         return result;
     }
 
-    private List<NoticeEntity> getAlternatives(Connection connection, ImportRealtyObjectEntity importRealtyObjectEntity, HouseEntity houseEntity) {
+    private List<NoticeWrapper> getAlternatives(Connection connection, ImportRealtyObjectEntity importRealtyObjectEntity, HouseEntity houseEntity) {
 
         double latitude = houseEntity.getCoords().getCenter().getLatitude();
         double longitude = houseEntity.getCoords().getCenter().getLongitude();
@@ -619,10 +642,14 @@ public class RealtyService extends AbstractParser {
             noticeInfoWithAvgPriceEntityList.addAll(liteNoticeList);
         }
 
-        // Теперь нужно заняться поиском в радиусе километра.
+        Long[] noticeIdArr = new Long[noticeInfoWithAvgPriceEntityList.size()];
 
-        return new ArrayList<>();
+        for (int i = 0; i < noticeInfoWithAvgPriceEntityList.size(); i++) {
+            VNoticeInfoWithAvgPriceEntity notice = noticeInfoWithAvgPriceEntityList.get(i);
+            noticeIdArr[i] = notice.getId();
+        }
 
+        return reportService.getNoticesByIdList(connection, noticeIdArr);
     }
 
     public void createOrUpdateAllNoticeIndex(RequestHelper requestHelper) {
@@ -869,7 +896,107 @@ public class RealtyService extends AbstractParser {
         return houseEntity;
     }
 
-    public SimpleResultDto selectStandartObjects(RequestHelper requestHelper, SelectedStandartObjectDto dto) {
+    private Map<String, AdjustCoeffsDto> getAdjustCoeffs(ImportExcelRealtyDto object, ImportRealtyObjectEntity standart) {
+        Map<String, AdjustCoeffsDto> result = new HashMap<>();
+
+        result.put(ERealtyParam.TRADE.getName(), realtyMapper.toAdjustCoeffDto(adjustCoeffDictMap.get("TRADE_TRADE_TRADE")));
+
+        ETotalArea objectArea = ETotalArea.getByArea(object.getTotalArea());
+        ETotalArea standartArea = ETotalArea.getByArea(standart.getTotalArea());
+
+        if (objectArea != standartArea) {
+            AdjustCoeffsEntity adjustCoeffsEntity =
+                    adjustCoeffDictMap.get(createAdjustCoeffKey(ERealtyParam.TOTAL_SQUARE.getName(), standartArea.getName(), objectArea.getName()));
+
+            if (adjustCoeffsEntity != null) {
+                result.put(ERealtyParam.TOTAL_SQUARE.getName(), realtyMapper.toAdjustCoeffDto(adjustCoeffsEntity));
+            }
+        }
+
+        EMetroDistance objectMetroDistance = EMetroDistance.fromDistance(object.getMetroDistance());
+        EMetroDistance standartMetroDistance = EMetroDistance.fromDistance(standart.getMetroDistance());
+
+        if (objectMetroDistance != standartMetroDistance) {
+            AdjustCoeffsEntity adjustCoeffsEntity =
+                    adjustCoeffDictMap.get(createAdjustCoeffKey(ERealtyParam.METRO_DISTANCE.getName(), standartMetroDistance.getName(), objectMetroDistance.getName()));
+
+            if (adjustCoeffsEntity != null) {
+                result.put(ERealtyParam.TOTAL_SQUARE.getName(), realtyMapper.toAdjustCoeffDto(adjustCoeffsEntity));
+            }
+        }
+
+        EFloor objectFloor = EFloor.getByFloorAndHouseFloor(object.getFloor(), object.getHouseFloorsCount());
+        EFloor standartFloor = EFloor.getByFloorAndHouseFloor(standart.getFloor(), standart.getHouseFloorsCount());
+
+        if (objectFloor != standartFloor) {
+            AdjustCoeffsEntity adjustCoeffsEntity =
+                    adjustCoeffDictMap.get(createAdjustCoeffKey(ERealtyParam.FLOOR.getName(), standartFloor.getName(), objectFloor.getName()));
+
+            if (adjustCoeffsEntity != null) {
+                result.put(ERealtyParam.FLOOR.getName(), realtyMapper.toAdjustCoeffDto(adjustCoeffsEntity));
+            }
+        }
+
+        EKitchenArea objectKitchenArea = EKitchenArea.getByArea(object.getKitchenArea());
+        EKitchenArea standartKitchenArea = EKitchenArea.getByArea(standart.getKitchenArea());
+
+        if (objectKitchenArea != standartKitchenArea) {
+            AdjustCoeffsEntity adjustCoeffsEntity =
+                    adjustCoeffDictMap.get(createAdjustCoeffKey(ERealtyParam.KITCHEN_SQUARE.getName(), standartKitchenArea.getName(), objectKitchenArea.getName()));
+
+            if (adjustCoeffsEntity != null) {
+                result.put(ERealtyParam.KITCHEN_SQUARE.getName(), realtyMapper.toAdjustCoeffDto(adjustCoeffsEntity));
+            }
+        }
+
+        EBalconParam objectBalconParam = object.getBalcon();
+        EBalconParam standartBalconParam = standart.getBalcon();
+
+        if (objectBalconParam != standartBalconParam) {
+            AdjustCoeffsEntity adjustCoeffsEntity =
+                    adjustCoeffDictMap.get(createAdjustCoeffKey(ERealtyParam.BALCON.getName(), standartBalconParam.getName(), objectBalconParam.getName()));
+
+            if (adjustCoeffsEntity != null) {
+                result.put(ERealtyParam.BALCON.getName(), realtyMapper.toAdjustCoeffDto(adjustCoeffsEntity));
+            }
+        }
+
+        ERepairType objectRepairType = object.getRepairType();
+        ERepairType standartRepairType = standart.getRepairType();
+
+        if (objectRepairType != standartRepairType) {
+            AdjustCoeffsEntity adjustCoeffsEntity =
+                    adjustCoeffDictMap.get(createAdjustCoeffKey(ERealtyParam.REPAIR_TYPE.getName(), standartRepairType.getName(), objectRepairType.getName()));
+
+            if (adjustCoeffsEntity != null) {
+                result.put(ERealtyParam.REPAIR_TYPE.getName(), realtyMapper.toAdjustCoeffDto(adjustCoeffsEntity));
+            }
+        }
+
+        return result;
+    }
+
+    private List<AdjustmentImportRealtyWrapDto> calcAnalogCoeffs(Connection connection, List<NoticeWrapper> alternativeList,
+                                                                 ImportRealtyObjectEntity standart) {
+
+        List<AdjustmentImportRealtyWrapDto> result = new ArrayList<>();
+
+        for (NoticeWrapper alternativeWrapper : alternativeList) {
+            ImportExcelRealtyDto object = realtyConverter.toAdjustmentImportRealtyDto(alternativeWrapper);
+
+            Map<String, AdjustCoeffsDto> adjustCoeffsMap = getAdjustCoeffs(object, standart);
+
+            AdjustmentImportRealtyWrapDto adjustmentImportRealtyWrapDto = new AdjustmentImportRealtyWrapDto();
+            adjustmentImportRealtyWrapDto.setObject(object);
+            adjustmentImportRealtyWrapDto.setAdjustCoeffsMap(adjustCoeffsMap);
+            result.add(adjustmentImportRealtyWrapDto);
+        }
+
+        return result;
+    }
+
+    public List<EvalutionStandartObjDto> selectStandartObjects(RequestHelper requestHelper, SelectedStandartObjectDto dto) {
+        List<EvalutionStandartObjDto> result = new ArrayList<>();
 
         Connection connection = requestHelper.getConnection();
 
@@ -892,11 +1019,19 @@ public class RealtyService extends AbstractParser {
 
             HouseEntity houseEntity = findHouseByPreviousValues(connection, importRealtyObjectEntity.getAddress(), houseDto, cityEntity, houseEntityMap);
 
+            List<NoticeWrapper> alternativeList = getAlternatives(connection, importRealtyObjectEntity, houseEntity);
 
-            List<NoticeEntity> alternativeList = getAlternatives(connection, importRealtyObjectEntity, houseEntity);
+            List<AdjustmentImportRealtyWrapDto> adjustmentImportRealtyWrapDtos =
+                    calcAnalogCoeffs(connection, alternativeList, importRealtyObjectEntity);
+
+            EvalutionStandartObjDto evalutionStandartObjDto = new EvalutionStandartObjDto();
+            evalutionStandartObjDto.setStandartObj(importMapper.toImportExcelRealtyDto(importRealtyObjectEntity));
+            evalutionStandartObjDto.setAnalogList(adjustmentImportRealtyWrapDtos);
+
+            result.add(evalutionStandartObjDto);
         }
 
-        return new SimpleResultDto(true);
+        return result;
     }
 
 }

@@ -4,24 +4,27 @@ import interfaces.report.ITitled;
 
 public enum EMetroDistance implements ITitled {
 
-    UNKNOWN(0, "UNKNOWN", ""),
-    LESS5(1, "LESS7", "<5"),
-    FROM5TO10(2, "FROM5TO10", "5-10"),
-    FROM10TO15(3, "FROM10TO15", "10-15"),
-    FROM15TO30(4, "FROM15TO30", "15-30"),
-    FROM30TO60(5, "FROM30TO60", "30-60"),
-    FROM60TO90(6, "FROM60TO90", "60-90");
+    UNKNOWN(0, -1, "UNKNOWN", ""),
+    LESS5(1, 5, "LESS7", "<5"),
+    FROM5TO10(2, 10, "FROM5TO10", "5-10"),
+    FROM10TO15(3, 15, "FROM10TO15", "10-15"),
+    FROM15TO30(4, 30, "FROM15TO30", "15-30"),
+    FROM30TO60(5, 60, "FROM30TO60", "30-60"),
+    FROM60TO90(6, 90, "FROM60TO90", "60-90");
 
     private static EMetroDistance[] values = values();
 
     private final int id;
 
+    private final int distanceExample;
+
     private final String name;
 
     private final String title;
 
-    EMetroDistance(int id, String name, String title) {
+    EMetroDistance(int id, int distanceExample, String name, String title) {
         this.id = id;
+        this.distanceExample = distanceExample;
         this.name = name;
         this.title = title;
     }
@@ -94,4 +97,7 @@ public enum EMetroDistance implements ITitled {
         return values;
     }
 
+    public int getDistanceExample() {
+        return distanceExample;
+    }
 }

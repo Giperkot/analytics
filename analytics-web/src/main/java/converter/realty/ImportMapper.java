@@ -12,8 +12,8 @@ public interface ImportMapper {
         return ERoomsCount.getByRoomsCount(roomsCountStr);
     }
 
-    abstract ImportRealtyObjectEntity toImportRealtyObjectEntity(ImportExcelRealtyDto importExcelRealtyDto);
+    ImportRealtyObjectEntity toImportRealtyObjectEntity(ImportExcelRealtyDto importExcelRealtyDto);
 
-    abstract ImportExcelRealtyDto toImportExcelRealtyDto(ImportRealtyObjectEntity entity);
+    ImportExcelRealtyDto toImportExcelRealtyDto(ImportRealtyObjectEntity entity);
 
 }

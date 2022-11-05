@@ -6,9 +6,9 @@ public enum EKitchenArea implements ITitled {
 
     UNKNOWN(0, "UNKNOWN", ""),
     LESS7(1, "LESS7", "<7"),
-    FROM7TO10(2, "FROM30TO50", "7-10"),
-    FROM10TO15(3, "FROM50TO65", "10-15"),
-    MORE15(6, "MORE120", ">15");
+    FROM7TO10(2, "FROM7TO10", "7-10"),
+    FROM10TO15(3, "FROM10TO15", "10-15"),
+    MORE15(6, "MORE15", ">15");
 
     private static EKitchenArea[] values = values();
 

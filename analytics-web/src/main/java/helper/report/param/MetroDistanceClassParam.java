@@ -12,13 +12,21 @@ import interfaces.report.ITitled;
 import java.io.IOException;
 
 public class MetroDistanceClassParam implements IClassParam {
-    @Override
-    public int getOrderByValue(NoticeWrapper value) {
 
+    private static final MetroDistanceClassParam instance = new MetroDistanceClassParam();
+
+    public static MetroDistanceClassParam getInstance() {
+        return instance;
+    }
+
+    private MetroDistanceClassParam() {
+    }
+
+    public EMetroDistance getMetroDistance(NoticeWrapper value) {
         VFeatureValueEntity metroFeature = value.getFeatureByExactName(EFeatureExactName.METRO);
 
         if (metroFeature == null || metroFeature.getValue() == null) {
-            return EMetroDistance.UNKNOWN.getId();
+            return EMetroDistance.UNKNOWN;
         }
 
         try {
@@ -26,30 +34,35 @@ public class MetroDistanceClassParam implements IClassParam {
 
             if (metroArr.length > 0) {
                 if ("до 5 мин.".equals(metroArr[0].value)) {
-                    return EMetroDistance.LESS5.getId();
+                    return EMetroDistance.LESS5;
                 }
 
                 if ("6–10 мин.".equals(metroArr[0].value)) {
-                    return EMetroDistance.FROM5TO10.getId();
+                    return EMetroDistance.FROM5TO10;
                 }
 
                 if ("11–15 мин.".equals(metroArr[0].value)) {
-                    return EMetroDistance.FROM10TO15.getId();
+                    return EMetroDistance.FROM10TO15;
                 }
 
                 if ("21–30 мин.".equals(metroArr[0].value)) {
-                    return EMetroDistance.FROM15TO30.getId();
+                    return EMetroDistance.FROM15TO30;
                 }
 
                 if ("от 31 мин.".equals(metroArr[0].value)) {
-                    return EMetroDistance.FROM30TO60.getId();
+                    return EMetroDistance.FROM30TO60;
                 }
             }
 
-            return EMetroDistance.UNKNOWN.getId();
+            return EMetroDistance.UNKNOWN;
         } catch (IOException e) {
             throw new RuntimeException("Ошибка при парсинге расстояния до метро");
         }
+    }
+
+    @Override
+    public int getOrderByValue(NoticeWrapper value) {
+        return getMetroDistance(value).getId();
     }
 
     @Override

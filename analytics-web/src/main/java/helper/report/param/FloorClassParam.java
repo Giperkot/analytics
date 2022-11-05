@@ -9,6 +9,19 @@ import interfaces.report.ITitled;
 
 public class FloorClassParam implements IClassParam {
 
+    private static final FloorClassParam instance = new FloorClassParam();
+
+    public static FloorClassParam getInstance() {
+        return instance;
+    }
+
+    private FloorClassParam() {
+    }
+
+    public int getFloor(NoticeWrapper value) {
+        VFeatureValueEntity floorFeature = value.getFeatureByExactName(EFeatureExactName.FLOOR);
+        return Integer.parseInt(floorFeature.getValue());
+    }
 
     @Override
     public int getOrderByValue(NoticeWrapper value) {
@@ -23,11 +36,7 @@ public class FloorClassParam implements IClassParam {
         int floor = Integer.parseInt(floorFeature.getValue());
         int houseFloor = Integer.parseInt(houseFloorFeature.getValue());
 
-        if (floor < houseFloor && floor > 1) {
-            return EFloor.AVERAGE.getId();
-        } else {
-            return EFloor.FIRST_OR_LAST.getId();
-        }
+        return EFloor.getByFloorAndHouseFloor(floor, houseFloor).getId();
     }
 
     @Override

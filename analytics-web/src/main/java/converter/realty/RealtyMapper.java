@@ -1,7 +1,9 @@
 package converter.realty;
 
+import db.entity.realty.AdjustCoeffsEntity;
 import db.entity.realty.DistrictEntity;
 import db.entity.realty.view.VNoticeInfoWithAvgPriceEntity;
+import dto.realty.AdjustCoeffsDto;
 import dto.realty.FullDistrictDto;
 import dto.realty.VNoticeInfoWithAvgPriceDto;
 import org.mapstruct.Mapper;
@@ -18,4 +20,6 @@ public interface RealtyMapper {
 
     @Mapping(source = "parentId", target = "parentDistrictId")
     DistrictEntity toDistrictEntity(FullDistrictDto districtDto);
+
+    AdjustCoeffsDto toAdjustCoeffDto(AdjustCoeffsEntity entity);
 }

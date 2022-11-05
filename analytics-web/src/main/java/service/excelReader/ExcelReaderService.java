@@ -40,9 +40,9 @@ public class ExcelReaderService {
         return instance;
     }
 
-    private ImportMapper importMapper = new ImportMapperImpl();
+    private final ImportMapper importMapper = new ImportMapperImpl();
 
-    private ImportRealtyDao importRealtyDao = ImportRealtyDao.getInstance();
+    private final ImportRealtyDao importRealtyDao = ImportRealtyDao.getInstance();
 
     private ExcelReaderService() {
     }
@@ -188,5 +188,9 @@ public class ExcelReaderService {
         importResponseDto.setRequestId(importRealtyRequestEntity.getId());
 
         return importResponseDto;
+    }
+
+    public ImportMapper getImportMapper() {
+        return importMapper;
     }
 }

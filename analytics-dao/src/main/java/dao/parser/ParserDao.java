@@ -12,7 +12,6 @@ import db.entity.parser.action.NoticeFeatureActionEntity;
 import db.entity.parser.view.VDistrictNoticeEntity;
 import db.entity.parser.view.VFeatureValueEntity;
 import db.entity.parser.view.VParserNoticeEntity;
-import db.entity.realty.admin.AddrHouseEntity;
 import dto.parser.FeatureComplexValue;
 import dto.parser.FeatureDto;
 import enums.EDirectionName;
@@ -200,6 +199,21 @@ public class ParserDao extends AbstractDao {
                 + "where status = 'ACTIVE' and h.district_id > 1";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            ResultSet resultSet = statement.executeQuery();
+
+            return mappingMultipleResult(resultSet, VDistrictNoticeEntity.class);
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public List<VDistrictNoticeEntity> getNoticesByIdList(Connection connection, Long[] noticeIdList) {
+        String sql = "select n.*, h.district_id from parser.notice n "
+                + "    join realty.house h on n.house_id = h.id "
+                + "where n.id = any(?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setArray(1, connection.createArrayOf("bigint", noticeIdList));
             ResultSet resultSet = statement.executeQuery();
 
             return mappingMultipleResult(resultSet, VDistrictNoticeEntity.class);

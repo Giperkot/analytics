@@ -9,31 +9,44 @@ import helper.report.IClassParam;
 import interfaces.report.ITitled;
 
 public class SimpleHouseTypeParam implements IClassParam {
-    @Override
-    public int getOrderByValue(NoticeWrapper value) {
 
+    private static final SimpleHouseTypeParam instance = new SimpleHouseTypeParam();
+
+    public static SimpleHouseTypeParam getInstance() {
+        return instance;
+    }
+
+    private SimpleHouseTypeParam() {
+    }
+
+    public ESimpleHouseType getSimpleHouseType(NoticeWrapper value) {
         VFeatureValueEntity houseTypeStr = value.getFeatureByExactName(EFeatureExactName.HOUSE_TYPE);
 
         if (houseTypeStr == null) {
             // throw new RuntimeException("Тип стен не указан.");
-            return ESimpleHouseType.UNKNOWN.getId();
+            return ESimpleHouseType.UNKNOWN;
         }
 
         EHouseType houseType = EHouseType.getByTitle(houseTypeStr.getValue());
 
         switch (houseType) {
             case BRICK:
-                return ESimpleHouseType.BRICK.getId();
+                return ESimpleHouseType.BRICK;
             case BLOCK:
             case PANEL:
-                return ESimpleHouseType.PANEL.getId();
+                return ESimpleHouseType.PANEL;
             case MONOLIT:
             case BRICK_MONOLIT:
-                return ESimpleHouseType.MONOLIT.getId();
+                return ESimpleHouseType.MONOLIT;
             default:
-                return ESimpleHouseType.UNKNOWN.getId();
-                //throw new RuntimeException("Тип стен не указан.");
+                return ESimpleHouseType.UNKNOWN;
+            //throw new RuntimeException("Тип стен не указан.");
         }
+    }
+
+    @Override
+    public int getOrderByValue(NoticeWrapper value) {
+        return getSimpleHouseType(value).getId();
     }
 
     @Override

@@ -8,9 +8,17 @@ import helper.report.IClassParam;
 import interfaces.report.ITitled;
 
 public class RepairTypeClassParam implements IClassParam {
-    @Override
-    public int getOrderByValue(NoticeWrapper value) {
 
+    private static final RepairTypeClassParam instance = new RepairTypeClassParam();
+
+    public static RepairTypeClassParam getInstance() {
+        return instance;
+    }
+
+    private RepairTypeClassParam() {
+    }
+
+    public ERepairType getRepairType(NoticeWrapper value) {
         VFeatureValueEntity repair = value.getFeatureByExactName(EFeatureExactName.REPAIR);
         VFeatureValueEntity repairType = value.getFeatureByExactName(EFeatureExactName.REPAIR_TYPE);
 
@@ -18,16 +26,16 @@ public class RepairTypeClassParam implements IClassParam {
             String repairStr = repair.getValue();
 
             if ("требует ремонта".equals(repairStr)) {
-                return ERepairType.NONE.getId();
+                return ERepairType.NONE;
             }
             if ("косметический".equals(repairStr)) {
-                return ERepairType.BAD.getId();
+                return ERepairType.BAD;
             }
             if ("дизайнерский".equals(repairStr)) {
-                return ERepairType.GOOD.getId();
+                return ERepairType.GOOD;
             }
             if ("евро".equals(repairStr)) {
-                return ERepairType.GOOD.getId();
+                return ERepairType.GOOD;
             }
         }
 
@@ -35,17 +43,22 @@ public class RepairTypeClassParam implements IClassParam {
             String repairStr = repairType.getValue();
 
             if ("без отделки".equals(repairStr)) {
-                return ERepairType.NONE.getId();
+                return ERepairType.NONE;
             }
             if ("предчистовая".equals(repairStr)) {
-                return ERepairType.BAD.getId();
+                return ERepairType.BAD;
             }
             if ("чистовая".equals(repairStr)) {
-                return ERepairType.GOOD.getId();
+                return ERepairType.GOOD;
             }
         }
 
-        return ERepairType.UNKNOWN.getId();
+        return ERepairType.UNKNOWN;
+    }
+
+    @Override
+    public int getOrderByValue(NoticeWrapper value) {
+        return getRepairType(value).getId();
     }
 
     @Override

@@ -494,3 +494,20 @@ alter table realty.notice_category
     add column total_square varchar(255),
     add column kitchen_square varchar(255),
     add column metro_distance varchar(255);
+
+create table realty.adjust_coeffs(
+    id bigserial not null primary key,
+    create_time timestamp not null default now(),
+    from_parametr varchar(255) not null,
+    to_parameter varchar(255) not null,
+    value double precision not null,
+    extreme boolean not null default false
+);
+create unique index adjust_coeffs_from_parametr_to_parameter_uindex
+    on realty.adjust_coeffs (from_parametr, to_parameter);
+
+alter table realty.adjust_coeffs
+    add column type varchar(255) not null default 'TOTAL_SQUARE';
+
+alter table realty.adjust_coeffs
+    add column absolute boolean not null default false;

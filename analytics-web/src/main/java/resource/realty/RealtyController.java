@@ -5,6 +5,7 @@ import dto.common.SimpleResultDto;
 import dto.realty.FullDistrictDto;
 import dto.realty.NoticeInfoFilter;
 import dto.realty.VNoticeInfoWithAvgPriceDto;
+import dto.realty.excelimport.standart.EvalutionStandartObjDto;
 import dto.realty.standart.SelectedStandartObjectDto;
 import service.realty.RealtyService;
 
@@ -38,7 +39,7 @@ public class RealtyController {
 
     @POST
     @Path("selectStandartObjects")
-    public SimpleResultDto selectStandartObjects(RequestHelper requestHelper, SelectedStandartObjectDto dto) {
+    public List<EvalutionStandartObjDto> selectStandartObjects(RequestHelper requestHelper, SelectedStandartObjectDto dto) {
         return realtyService.selectStandartObjects(requestHelper, dto);
     }
 

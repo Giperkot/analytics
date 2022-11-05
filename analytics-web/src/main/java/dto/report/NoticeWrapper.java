@@ -13,7 +13,7 @@ public class NoticeWrapper {
 
     private VDistrictNoticeEntity noticeEntity;
 
-    private Map<EFeatureExactName, VFeatureValueEntity> featureDtoMap;
+    private final Map<EFeatureExactName, VFeatureValueEntity> featureDtoMap;
 
     public NoticeWrapper(VDistrictNoticeEntity noticeEntity,
                          List<VFeatureValueEntity> featureDtoList) {

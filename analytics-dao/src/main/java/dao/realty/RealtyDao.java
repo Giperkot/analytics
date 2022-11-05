@@ -5,6 +5,7 @@ import consts.GeoConst;
 import consts.ProjectConst;
 import dao.AbstractDao;
 import db.entity.parser.view.VNoticeEntity;
+import db.entity.realty.AdjustCoeffsEntity;
 import db.entity.realty.CityEntity;
 import db.entity.realty.DistrictEntity;
 import db.entity.realty.HouseAddInfoEntity;
@@ -45,6 +46,18 @@ public class RealtyDao extends AbstractDao {
     }
 
     private RealtyDao() {
+    }
+
+    public List<AdjustCoeffsEntity> getAdjustCoeffList(Connection connection) {
+        String sql = "select * from realty.adjust_coeffs";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            ResultSet resultSet = statement.executeQuery();
+
+            return mappingMultipleResult(resultSet, AdjustCoeffsEntity.class);
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     public List<VNoticeEntity> getNoticesWithoutAddressByDirection(Connection connection, EDirectionName directionName) {
