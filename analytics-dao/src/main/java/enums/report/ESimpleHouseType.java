@@ -6,8 +6,8 @@ import interfaces.report.ITitled;
 @EnumMethodDataBase(fromDbName = "fromString")
 public enum ESimpleHouseType implements ITitled {
     UNKNOWN(0, "UNKNOWN", "Неизвестно"),
-    BRICK(1, "BRICK", "Кирпичн"),
-    MONOLIT(2, "MONOLIT", "Монолит)"),
+    BRICK(1, "BRICK", "Кирпич"),
+    MONOLIT(2, "MONOLIT", "Монолит"),
     PANEL(3, "PANEL", "Панель");
 
     private static ESimpleHouseType[] values = values();
