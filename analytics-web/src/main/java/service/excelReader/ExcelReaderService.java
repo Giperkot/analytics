@@ -162,7 +162,7 @@ public class ExcelReaderService {
                     throw new IllegalArgumentException("В седьмом столбце (Площадь квартиры) ожидается числовое значение");
                 }
                 if (row.getCell(7).getCellType() == CellType.NUMERIC) {
-                    double kitchenArea = (float) row.getCell(7).getNumericCellValue();
+                    double kitchenArea = row.getCell(7).getNumericCellValue();
                     excelRealtyDto.setKitchenArea(kitchenArea);
                     excelRealtyDtoToShow.setKitchenArea(kitchenArea);
                 } else {
