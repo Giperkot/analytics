@@ -44,7 +44,8 @@ public enum ERealtySegment implements ITitled {
             }
         }
 
-        throw new IllegalArgumentException("Значение не найдено " + value);
+        throw new IllegalArgumentException("Значение столбца Сегмент (" + value + ") не найдено. " +
+                "Ожидается одно из значений: " + getTitlesEnum());
     }
 
     public int getId() {
@@ -72,5 +73,13 @@ public enum ERealtySegment implements ITitled {
 
     public static ERealtySegment[] getValues() {
         return values;
+    }
+
+    public static String getTitlesEnum() {
+        String titles = "";
+        for(ERealtySegment value: getValues()) {
+            titles += value.getTitle() + ", ";
+        }
+        return titles.substring(0, titles.length() - 2);
     }
 }

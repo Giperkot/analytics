@@ -8,6 +8,8 @@ public class ImportResponseDto {
 
     private List<ShowImportExcelRealtyDto> importExcelRealtyDtoList;
 
+    private String exception;
+
     public long getRequestId() {
         return requestId;
     }
@@ -22,5 +24,13 @@ public class ImportResponseDto {
 
     public void setImportExcelRealtyDtoList(List<ShowImportExcelRealtyDto> importExcelRealtyDtoList) {
         this.importExcelRealtyDtoList = importExcelRealtyDtoList;
+    }
+
+    public String getException() {
+        return exception;
+    }
+
+    public void setException(String exception) {
+        this.exception = exception;
     }
 }

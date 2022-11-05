@@ -355,22 +355,37 @@
               events: {
                 onLoadFile: function () {
                   let fileUploader = cmpCore.findByName("realtyImportUploader");
-
                   let formData = fileUploader.getFormData();
 
-                  helper.getHttpPromise({
-                    method: "POST",
-                    url: "/api/import/readExcel",
-                    multipartData: formData
-                  }).then(function (response) {
-                    var ans = JSON.parse(response);
+                  let promise = new Promise((resolve, reject) => {
+                    helper.getHttpPromise({
+                      method: "POST",
+                      url: "/api/import/readExcel",
+                      multipartData: formData
+                    }).then(function (response) {
+                      console.log(response);
+                      let ans = JSON.parse(response);
+                      console.log(ans);
 
-                    let resultTable = cmpCore.findByName("resultTable");
-                    resultTable.setGridData(ans.importExcelRealtyDtoList);
-                    resultTable.render(resultTable.rootElm.containerElm);
-                    resultTable.bind();
+                      if (ans.importExcelRealtyDtoList.length > 0) {
+                        resolve(ans);
+                      } else {
+                        reject(ans.exception);
+                      }
+                    })
                   });
 
+                  promise.then(
+                      result => {
+                        let resultTable = cmpCore.findByName("resultTable");
+                        resultTable.setGridData(result.importExcelRealtyDtoList);
+                        resultTable.render(resultTable.rootElm.containerElm);
+                        resultTable.bind();
+                      },
+                      error => {
+                        alert(error);
+                      }
+                  );
                 }
               }
             }, {

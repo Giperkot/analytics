@@ -100,6 +100,9 @@ public class ExcelReaderService {
         List<ImportRealtyObjectEntity> realtyObjectEntityList = new ArrayList<>();
         List<ShowImportExcelRealtyDto> excelRealtyDtoToShowList = new ArrayList<>();
 
+        ImportResponseDto importResponseDto = new ImportResponseDto();
+        importResponseDto.setImportExcelRealtyDtoList(excelRealtyDtoToShowList);
+
         // todo Нужно сделать валидацию.
         for (int i = firstIdx + 1; ; i++) {
             Row row = sheet.getRow(i);
@@ -111,60 +114,83 @@ public class ExcelReaderService {
             ImportExcelRealtyDto excelRealtyDto = new ImportExcelRealtyDto();
             ShowImportExcelRealtyDto excelRealtyDtoToShow = new ShowImportExcelRealtyDto();
 
-            if (row.getCell(0).getCellType() == CellType.STRING) {
-                String location = row.getCell(0).getStringCellValue();
-                excelRealtyDto.setAddress(location);
-                excelRealtyDtoToShow.setAddress(location);
-            }
-            if (row.getCell(1).getCellType() == CellType.NUMERIC) {
-                int rooms = (int) row.getCell(1).getNumericCellValue();
-                excelRealtyDto.setRoomsCount(rooms);
-                excelRealtyDtoToShow.setRoomsCount(rooms);
-            }
-            if (row.getCell(2).getCellType() == CellType.STRING) {
-                String buildingType = row.getCell(2).getStringCellValue();
-                excelRealtyDto.setRealtySegment(ERealtySegment.getByTitle(buildingType));
-                excelRealtyDtoToShow.setRealtySegment(buildingType);
-            }
-            if (row.getCell(3).getCellType() == CellType.NUMERIC) {
-                int floorsInBuilding = (int) row.getCell(3).getNumericCellValue();
-                excelRealtyDto.setHouseFloorsCount(floorsInBuilding);
-                excelRealtyDtoToShow.setHouseFloorsCount(floorsInBuilding);
-            }
-            if (row.getCell(4).getCellType() == CellType.STRING) {
-                String wallsMaterial = row.getCell(4).getStringCellValue();
-                excelRealtyDto.setWallMaterial(ESimpleHouseType.getByTitle(wallsMaterial));
-                excelRealtyDtoToShow.setWallMaterial(wallsMaterial);
-            }
-            if (row.getCell(5).getCellType() == CellType.NUMERIC) {
-                int floor = (int) row.getCell(5).getNumericCellValue();
-                excelRealtyDto.setFloor(floor);
-                excelRealtyDtoToShow.setFloor(floor);
-            }
-            if (row.getCell(6).getCellType() == CellType.NUMERIC) {
-                double apartmentArea = row.getCell(6).getNumericCellValue();
-                excelRealtyDto.setTotalArea(apartmentArea);
-                excelRealtyDtoToShow.setTotalArea(apartmentArea);
-            }
-            if (row.getCell(7).getCellType() == CellType.NUMERIC) {
-                double kitchenArea = (float) row.getCell(7).getNumericCellValue();
-                excelRealtyDto.setKitchenArea(kitchenArea);
-                excelRealtyDtoToShow.setKitchenArea(kitchenArea);
-            }
-            if (row.getCell(8).getCellType() == CellType.STRING) {
-                String balcony = row.getCell(8).getStringCellValue();
-                excelRealtyDto.setBalcon(EBalconParam.getByTitle(balcony));
-                excelRealtyDtoToShow.setBalcon(balcony);
-            }
-            if (row.getCell(9).getCellType() == CellType.NUMERIC) {
-                int distanceToMetro = (int) row.getCell(9).getNumericCellValue();
-                excelRealtyDto.setMetroDistance(distanceToMetro);
-                excelRealtyDtoToShow.setMetroDistance(distanceToMetro);
-            }
-            if (row.getCell(10).getCellType() == CellType.STRING) {
-                String condition = row.getCell(10).getStringCellValue();
-                excelRealtyDto.setRepairType(ERepairType.getByTitle(condition));
-                excelRealtyDtoToShow.setRepairType(condition);
+            try {
+                if (row.getCell(0).getCellType() == CellType.STRING) {
+                    String location = row.getCell(0).getStringCellValue();
+                    if (location.replaceAll("\\s", "").length() == 0) {
+                        throw new IllegalArgumentException("В строке " + i + " ячейка Местоположение пустая");
+                    }
+                    excelRealtyDto.setAddress(location);
+                    excelRealtyDtoToShow.setAddress(location);
+                }
+                if (row.getCell(1).getCellType() == CellType.NUMERIC) {
+                    int rooms = (int) row.getCell(1).getNumericCellValue();
+                    excelRealtyDto.setRoomsCount(rooms);
+                    excelRealtyDtoToShow.setRoomsCount(rooms);
+                } else {
+                    throw new IllegalArgumentException("Во втором столбце (Количество комнат) ожидается числовое значение");
+                }
+                if (row.getCell(2).getCellType() == CellType.STRING) {
+                    String buildingType = row.getCell(2).getStringCellValue();
+                    excelRealtyDto.setRealtySegment(ERealtySegment.getByTitle(buildingType));
+                    excelRealtyDtoToShow.setRealtySegment(buildingType);
+                }
+                if (row.getCell(3).getCellType() == CellType.NUMERIC) {
+                    int floorsInBuilding = (int) row.getCell(3).getNumericCellValue();
+                    excelRealtyDto.setHouseFloorsCount(floorsInBuilding);
+                    excelRealtyDtoToShow.setHouseFloorsCount(floorsInBuilding);
+                } else {
+                    throw new IllegalArgumentException("В четвертом столбце (Этажность дома) ожидается числовое значение");
+                }
+                if (row.getCell(4).getCellType() == CellType.STRING) {
+                    String wallsMaterial = row.getCell(4).getStringCellValue();
+                    excelRealtyDto.setWallMaterial(ESimpleHouseType.getByTitle(wallsMaterial));
+                    excelRealtyDtoToShow.setWallMaterial(wallsMaterial);
+                }
+                if (row.getCell(5).getCellType() == CellType.NUMERIC) {
+                    int floor = (int) row.getCell(5).getNumericCellValue();
+                    excelRealtyDto.setFloor(floor);
+                    excelRealtyDtoToShow.setFloor(floor);
+                } else {
+                    throw new IllegalArgumentException("В шестом столбце (Этаж расположения) ожидается числовое значение");
+                }
+                if (row.getCell(6).getCellType() == CellType.NUMERIC) {
+                    double apartmentArea = row.getCell(6).getNumericCellValue();
+                    excelRealtyDto.setTotalArea(apartmentArea);
+                    excelRealtyDtoToShow.setTotalArea(apartmentArea);
+                } else {
+                    throw new IllegalArgumentException("В седьмом столбце (Площадь квартиры) ожидается числовое значение");
+                }
+                if (row.getCell(7).getCellType() == CellType.NUMERIC) {
+                    double kitchenArea = (float) row.getCell(7).getNumericCellValue();
+                    excelRealtyDto.setKitchenArea(kitchenArea);
+                    excelRealtyDtoToShow.setKitchenArea(kitchenArea);
+                } else {
+                    throw new IllegalArgumentException("В восьмом столбце (Площадь кухни) ожидается числовое значение");
+                }
+                if (row.getCell(8).getCellType() == CellType.STRING) {
+                    String balcony = row.getCell(8).getStringCellValue();
+                    excelRealtyDto.setBalcon(EBalconParam.getByTitle(balcony));
+                    excelRealtyDtoToShow.setBalcon(balcony);
+                }
+                if (row.getCell(9).getCellType() == CellType.NUMERIC) {
+                    int distanceToMetro = (int) row.getCell(9).getNumericCellValue();
+                    excelRealtyDto.setMetroDistance(distanceToMetro);
+                    excelRealtyDtoToShow.setMetroDistance(distanceToMetro);
+                } else {
+                    throw new IllegalArgumentException("В десятом столбце (Удаленность от станции метро) ожидается числовое значение");
+                }
+                if (row.getCell(10).getCellType() == CellType.STRING) {
+                    String condition = row.getCell(10).getStringCellValue();
+                    excelRealtyDto.setRepairType(ERepairType.getByTitle(condition));
+                    excelRealtyDtoToShow.setRepairType(condition);
+                }
+            } catch (IllegalArgumentException e) {
+                importResponseDto.setException(e.getMessage());
+                return importResponseDto;
+            } catch (NullPointerException e) {
+                importResponseDto.setException("В импортируемых данных найдена незаполненная ячейка");
+                return importResponseDto;
             }
 
             realtyObjectEntityList.add(importMapper.toImportRealtyObjectEntity(excelRealtyDto));
@@ -186,7 +212,6 @@ public class ExcelReaderService {
             throw new RuntimeException("Ошибка при сохранении запроса на импорт", exception);
         }
 
-        ImportResponseDto importResponseDto = new ImportResponseDto();
         importResponseDto.setImportExcelRealtyDtoList(excelRealtyDtoToShowList);
         importResponseDto.setRequestId(importRealtyRequestEntity.getId());
 
