@@ -402,6 +402,16 @@
                     let resultTable = cmpCore.findByName("resultTable");
                     let importPage = cmpCore.findByName("import");
 
+                    for (let i = 0; i < ans.importExcelRealtyDtoList.length; i++) {
+                      let row = ans.importExcelRealtyDtoList[i];
+
+                      row.balcon = AnalyticsConst.balcon[row.balcon].text;
+                      row.realtySegment = AnalyticsConst.realtySegment[row.realtySegment].text;
+                      row.repairType = AnalyticsConst.repairType[row.repairType].text;
+                      row.roomsCount = AnalyticsConst.roomsCount[row.roomsCount].text;
+                      row.wallMaterial = AnalyticsConst.simpleHouseType[row.wallMaterial].text;
+                    }
+
                     resultTable.setGridData(ans.importExcelRealtyDtoList);
                     resultTable.render(resultTable.rootElm.containerElm);
 
@@ -526,7 +536,7 @@
                     var ans = JSON.parse(response);
 
                     // Спрятать таблицу с эталонами.
-                    let continueRow = fileUploader.parent.containerElm.querySelector(".continue_row");
+                    let continueRow = importPage.containerElm.querySelector(".continue_row");
                     continueRow.classList.add("hidden");
 
                     // Отобразить страницу с подбором эталонных объектов.
