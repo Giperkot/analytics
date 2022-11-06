@@ -689,6 +689,19 @@
               children: [
 
               ]
+            }, {
+              name: "export_btn",
+              type: "CSendButton",
+              container: ".export_btn",
+              model: {
+                buttonText: "Экспорт в Excel"
+              },
+              events: {
+                click: function (evt) {
+                  popupForm.showForm(true);
+                  popupForm.showResult("We're so sorry...", "small");
+                }
+              }
             }
 
           ]
