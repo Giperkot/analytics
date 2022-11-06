@@ -447,7 +447,8 @@ create table realty.import_realty_object(
     repair_type varchar(255) not null
 );
 
-drop view realty.v_notice_info_with_avg_price;
+alter table realty.import_realty_object
+    add column sum double precision;
 
 alter table realty.notice_category
     add column classifier_category varchar(255) not null,
@@ -474,6 +475,8 @@ alter table realty.adjust_coeffs
 
 alter table realty.adjust_coeffs
     add column absolute boolean not null default false;
+
+
 
 create or replace view realty.v_notice_info_with_avg_price as(
     select

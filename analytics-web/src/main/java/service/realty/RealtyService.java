@@ -24,8 +24,10 @@ import dto.common.SimpleResultDto;
 import dto.geocode.CommonCoordsDto;
 import dto.realty.*;
 import dto.realty.excelimport.ImportExcelRealtyDto;
+import dto.realty.excelimport.ImportResponseDto;
 import dto.realty.excelimport.standart.AdjustmentImportRealtyWrapDto;
 import dto.realty.excelimport.standart.EvalutionStandartObjDto;
+import dto.realty.excelimport.standart.StandartRequestWrapper;
 import dto.realty.standart.SelectedStandartObjectDto;
 import dto.report.NoticeWrapper;
 import dto.report.RealtyConfigurationDto;
@@ -1032,6 +1034,134 @@ public class RealtyService extends AbstractParser {
         }
 
         return result;
+    }
+
+    private void calcStandartObject(List<AdjustmentImportRealtyWrapDto> analogList, ImportExcelRealtyDto importExcelRealtyDto) {
+        double sumAnalogPriceBySquare = 0;
+
+        for (AdjustmentImportRealtyWrapDto adjustmentImportRealtyWrapDto : analogList) {
+            Map<String, AdjustCoeffsDto> adjustCoeffsDtoMap = adjustmentImportRealtyWrapDto.getAdjustCoeffsMap();
+            ImportExcelRealtyDto analog = adjustmentImportRealtyWrapDto.getObject();
+
+            double priceBySquare = analog.getSum() / analog.getTotalArea();
+
+            for (AdjustCoeffsDto adjustCoeffsDto : adjustCoeffsDtoMap.values()) {
+                if (!adjustCoeffsDto.isAbsolute()) {
+                    priceBySquare = priceBySquare * (1 - adjustCoeffsDto.getValue());
+                } else {
+                    priceBySquare = priceBySquare - adjustCoeffsDto.getValue();
+                }
+            }
+
+            sumAnalogPriceBySquare += priceBySquare;
+        }
+
+        double avgSumByMeter = sumAnalogPriceBySquare / analogList.size();
+        importExcelRealtyDto.setSum(avgSumByMeter * importExcelRealtyDto.getTotalArea());
+    }
+
+    private ImportExcelRealtyDto findCorrectStandartObject(ImportRealtyObjectEntity importRealtyObjectEntity,
+                                                              List<EvalutionStandartObjDto> evalutionStandartObjDtoList) {
+
+        for (EvalutionStandartObjDto evalutionStandartObjDto : evalutionStandartObjDtoList) {
+            ImportExcelRealtyDto importStandartDto = evalutionStandartObjDto.getStandartObj();
+
+            ERoomsCount stRoomsCount = ERoomsCount.fromString(importStandartDto.getRoomsCount());
+
+            if (importRealtyObjectEntity.getRoomsCount() != stRoomsCount) {
+                continue;
+            }
+
+            if (importRealtyObjectEntity.getRealtySegment() != importStandartDto.getRealtySegment()) {
+                continue;
+            }
+
+            EHouseFloor houseFloor = EHouseFloor.getByHouseFloor(importRealtyObjectEntity.getHouseFloorsCount());
+            EHouseFloor stHouseFloor = EHouseFloor.getByHouseFloor(importStandartDto.getHouseFloorsCount());
+
+            if (houseFloor != stHouseFloor) {
+                continue;
+            }
+
+            if (importRealtyObjectEntity.getWallMaterial() != importStandartDto.getWallMaterial()) {
+                continue;
+            }
+
+            return importStandartDto;
+        }
+
+        return null;
+    }
+
+    private void calcConcreteObjectByStandart(ImportRealtyObjectEntity importRealtyObjectEntity, ImportExcelRealtyDto standartObject,
+                                              Map<String, AdjustCoeffsDto> adjustCoeffsMap) {
+
+        double sumBySquare = standartObject.getSum() / standartObject.getTotalArea();
+
+        for (AdjustCoeffsDto adjustCoeffsDto : adjustCoeffsMap.values()) {
+            if (!adjustCoeffsDto.isAbsolute()) {
+                sumBySquare = sumBySquare * (1 - adjustCoeffsDto.getValue());
+            } else {
+                sumBySquare = sumBySquare - adjustCoeffsDto.getValue();
+            }
+        }
+
+        importRealtyObjectEntity.setSum(sumBySquare * importRealtyObjectEntity.getTotalArea());
+    }
+
+    public ImportResponseDto calcResult(RequestHelper requestHelper, StandartRequestWrapper standartRequestWrapper) {
+        Connection connection = requestHelper.getConnection();
+        long requestId = standartRequestWrapper.getRequestId();
+
+        List<ImportRealtyObjectEntity> importRealtyObjectEntityList =
+                importRealtyDao.getImportRealtyObjectsByRequest(connection, requestId);
+
+        // 1. Считаем цену эталонного объекта.
+
+        List<EvalutionStandartObjDto> evalutionStandartObjDtoList = standartRequestWrapper.getEvalutionStandartObjDtoList();
+
+        for (EvalutionStandartObjDto evalutionStandartObjDto : evalutionStandartObjDtoList) {
+            ImportExcelRealtyDto importExcelRealtyDto = evalutionStandartObjDto.getStandartObj();
+
+            calcStandartObject(evalutionStandartObjDto.getAnalogList(), importExcelRealtyDto);
+        }
+
+        // 2. Рассчитываем остальные объекты из запроса.
+        for (ImportRealtyObjectEntity importRealtyObjectEntity : importRealtyObjectEntityList) {
+            try {
+                // 3. Найти подходящий эталонный объект.
+                ImportExcelRealtyDto standartObject = findCorrectStandartObject(importRealtyObjectEntity, evalutionStandartObjDtoList);
+
+                if (standartObject == null) {
+                    continue;
+                }
+
+                // 4. Найти коэффициенты
+                Map<String, AdjustCoeffsDto> adjustCoeffsMap = getAdjustCoeffs(standartObject, importRealtyObjectEntity);
+
+                // 5. Посчитать стоимость.
+                calcConcreteObjectByStandart(importRealtyObjectEntity, standartObject, adjustCoeffsMap);
+            } catch(Exception ex) {
+                LOGGER.error("Ошибка при поиске эталонного объекта ", ex);
+                // Эталона не нашлось...
+                int i = 0;
+            }
+        }
+
+        // 6. Сохранить результат.
+        importRealtyDao.updateImportRealtyObjects(connection, importRealtyObjectEntityList);
+        List<ImportExcelRealtyDto> realtyDtoList = new ArrayList<>();
+
+        for (ImportRealtyObjectEntity importRealtyObjectEntity : importRealtyObjectEntityList) {
+            realtyDtoList.add(importMapper.toImportExcelRealtyDto(importRealtyObjectEntity));
+        }
+
+        ImportResponseDto importResponseDto = new ImportResponseDto();
+
+        importResponseDto.setRequestId(standartRequestWrapper.getRequestId());
+        importResponseDto.setImportExcelRealtyDtoList(realtyDtoList);
+
+        return importResponseDto;
     }
 
 }

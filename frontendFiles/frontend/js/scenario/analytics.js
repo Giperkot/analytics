@@ -384,6 +384,7 @@
               events: {
                 onLoadFile: function () {
                   let self = this;
+                  let importObj = cmpCore.findByName("import");
                   let fileUploader = cmpCore.findByName("realtyImportUploader");
 
                   let formData = fileUploader.getFormData();
@@ -395,6 +396,8 @@
                     multipartData: formData
                   }).then(function (response) {
                     var ans = JSON.parse(response);
+
+                    importObj.temp.requestId = ans.requestId;
 
                     let uploadXlsFile = fileUploader.parent.containerElm.querySelector(".upload_xls_file");
                     uploadXlsFile.classList.add("hidden");
@@ -424,7 +427,6 @@
                     popupForm.showForm(true);
                     popupForm.showResult(ans.message, "small");
                   });
-
                 }
               }
             }, {
@@ -470,7 +472,7 @@
                   }, {
                     label: "Ремонт",
                     name: "repairType"
-                  },
+                  }
                 ],
                 controls: {
                   add: false,
@@ -502,9 +504,6 @@
               name: "continueBtn",
               type: "CSendButton",
               container: ".continue_btn",
-              /*properties: {
-                hidden: false
-              },*/
               model: {
                 buttonText: "Продолжить"
               },
@@ -534,6 +533,7 @@
                     jsonData: data
                   }).then(function (response) {
                     var ans = JSON.parse(response);
+                    importPage.temp.stObjectList = ans;
 
                     // Спрятать таблицу с эталонами.
                     let continueRow = importPage.containerElm.querySelector(".continue_row");
@@ -555,8 +555,142 @@
               container: ".showing_standart_object_result",
               properties: {
                 hidden: true
-              }
+              },
+              children: [
+                {
+                  name: "toResultBtn",
+                  type: "CSendButton",
+                  container: ".to_result_btn",
+                  model: {
+                    buttonText: "Расчитать"
+                  },
+                  methods: {
+                    numFormat: function (value) {
+                      let str = "" + value;
+
+                      let dotPos = str.indexOf(".");
+
+                      if (dotPos < 0) {
+                        dotPos = str.length;
+                      }
+
+                      for (let i = dotPos - 3; i > 0; i -= 3) {
+                        str = str.substring(0, i) + " " + str.substring(i, str.length);
+                      }
+
+                      return str;
+                    }
+                  },
+                  events: {
+                    click: function(evt) {
+                      let self = this;
+
+                      let importPage = cmpCore.findByName("import");
+                      let fileUploader = cmpCore.findByName("realtyImportUploader");
+
+                      let data = {
+                        requestId: importPage.temp.requestId,
+                        evalutionStandartObjDtoList: importPage.temp.stObjectList
+                      }
+
+                      //todo Тут бы ещё loader поставить...
+                      helper.getHttpPromise({
+                        method: "POST",
+                        url: "/api/realty/calcResult",
+                        jsonData: data
+                      }).then(function (response) {
+                        var ans = JSON.parse(response);
+
+                        let showingStandartObjectResult = self.rootElm.findByName("showingStandartObjectResult");
+                        showingStandartObjectResult.hide();
+
+                        let finalRow = self.rootElm.containerElm.querySelector(".final_row");
+                        finalRow.classList.remove("hidden");
+
+                        let calcResultTable = cmpCore.findByName("showingRealtyObjectsPrice");
+
+                        for (let i = 0; i < ans.importExcelRealtyDtoList.length; i++) {
+                          let row = ans.importExcelRealtyDtoList[i];
+
+                          row.balcon = AnalyticsConst.balcon[row.balcon].text;
+                          row.realtySegment = AnalyticsConst.realtySegment[row.realtySegment].text;
+                          row.repairType = AnalyticsConst.repairType[row.repairType].text;
+                          row.roomsCount = AnalyticsConst.roomsCount[row.roomsCount].text;
+                          row.wallMaterial = AnalyticsConst.simpleHouseType[row.wallMaterial].text;
+
+                          if (row.sum !== "NaN") {
+                            row.sum = self.numFormat((row.sum).toFixed(2));
+                          }
+
+                        }
+
+                        calcResultTable.setGridData(ans.importExcelRealtyDtoList);
+                        calcResultTable.render(calcResultTable.rootElm.containerElm);
+
+
+                      });
+                    }
+                  }
+                }
+              ]
+            }, {
+              name: "showingRealtyObjectsPrice",
+              type: "CTableSelector",
+              container: ".final_stage",
+              model: {
+                labelText: "Цены объектов",
+                columns: [
+                  {
+                    label: "Адрес",
+                    name: "address",
+                    className: "min_width_160"
+                  }, {
+                    label: "Кол. комнат",
+                    name: "roomsCount"
+                  }, /*{
+                    label: "Сегмент",
+                    name: "realtySegment"
+                  }, {
+                    label: "Кол. этажей",
+                    name: "houseFloorsCount"
+                  },*/ {
+                    label: "Материал стен",
+                    name: "wallMaterial"
+                  }, {
+                    label: "Этаж",
+                    name: "floor"
+                  }, {
+                    label: "Площадь",
+                    name: "totalArea"
+                  }, {
+                    label: "Кухня",
+                    name: "kitchenArea"
+                  }, {
+                    label: "Балкон",
+                    name: "balcon"
+                  }, {
+                    label: "Расст. до метро",
+                    name: "metroDistance"
+                  }, {
+                    label: "Ремонт",
+                    name: "repairType"
+                  }, {
+                    label: "Сумма, руб.",
+                    name: "sum",
+                    className: "min_width_90"
+                  }
+                ],
+                controls: {
+                  add: false,
+                  edit: false,
+                  delete: false
+                }
+              },
+              children: [
+
+              ]
             }
+
           ]
         }, {
           name: "reports",

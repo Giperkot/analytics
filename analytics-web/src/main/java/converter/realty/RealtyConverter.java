@@ -119,6 +119,7 @@ public class RealtyConverter {
         result.setBalcon(BalconClassParam.getInstance().getBalcon(noticeWrapper));
         result.setMetroDistance(MetroDistanceClassParam.getInstance().getMetroDistance(noticeWrapper).getDistanceExample());
         result.setRepairType(RepairTypeClassParam.getInstance().getRepairType(noticeWrapper));
+        result.setSum(noticeWrapper.getNoticeEntity().getSum());
 
         return result;
     }

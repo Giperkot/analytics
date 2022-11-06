@@ -50,6 +50,9 @@ public class ImportRealtyObjectEntity extends BaseEntity {
     @Column(name = "repair_type")
     private ERepairType repairType;
 
+    @Column(name = "sum")
+    private double sum;
+
     public Long getImportExcelRequestId() {
         return importExcelRequestId;
     }
@@ -144,5 +147,13 @@ public class ImportRealtyObjectEntity extends BaseEntity {
 
     public void setRepairType(ERepairType repairType) {
         this.repairType = repairType;
+    }
+
+    public double getSum() {
+        return sum;
+    }
+
+    public void setSum(double sum) {
+        this.sum = sum;
     }
 }

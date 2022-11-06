@@ -39,6 +39,8 @@ public class ImportExcelRealtyDto {
 
     private ERepairType repairType;
 
+    private double sum;
+
     public long getId() {
         return id;
     }
@@ -133,5 +135,13 @@ public class ImportExcelRealtyDto {
 
     public void setRepairType(ERepairType repairType) {
         this.repairType = repairType;
+    }
+
+    public double getSum() {
+        return sum;
+    }
+
+    public void setSum(double sum) {
+        this.sum = sum;
     }
 }

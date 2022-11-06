@@ -16,9 +16,9 @@ public class AnalyticsContext extends Context{
     public void customInit() {
         try (Connection connection = getConnection();) {
             RealtyService.getInstance().initializeAdjustCoeffDictMap(connection);
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             LOGGER.error("Ошибка инициализации корректоровочных коэффициэнтов", ex);
-            throw new RuntimeException("Ошибка инициализации корректоровочных коэффициэнтов", ex);
+            // throw new RuntimeException("Ошибка инициализации корректоровочных коэффициэнтов", ex);
         }
 
     }

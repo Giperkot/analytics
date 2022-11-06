@@ -101,4 +101,21 @@ public class ImportRealtyDao extends AbstractDao {
         }
     }
 
+    public void updateImportRealtyObjects(Connection connection, List<ImportRealtyObjectEntity> importRealtyObjectEntityList) {
+        String sql = "update realty.import_realty_object set sum = ? where id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql);) {
+            for (ImportRealtyObjectEntity realtyObjectEntity : importRealtyObjectEntityList) {
+                statement.setDouble(1, realtyObjectEntity.getSum());
+                statement.setLong(2, realtyObjectEntity.getId());
+
+                statement.addBatch();
+            }
+
+            statement.executeBatch();
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
 }

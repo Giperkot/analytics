@@ -22,8 +22,9 @@
       MORE_THAN_FIVE: {id: 2, title: "Более пяти этажей"}
     },
     floor: {
-      FIRST_OR_LAST: {id: 0, title: "Первый или последний этаж"},
-      AVERAGE: {id: 1, title: "Средние этажи"}
+      FIRST: {id: 0, title: "Первый"},
+      AVERAGE: {id: 1, title: "Средний"},
+      LAST: {id: 2, title: "Последний"}
     },
     balcon: {
       FALSE: {id: 0, title: "Отсутствует", text: "нет"},
@@ -52,6 +53,54 @@
       NONE: {id: 1, name: "NONE", text: "Без отделки"},
         BAD: {id: 2, name: "BAD", text:  "Муниципальный ремонт"},
         GOOD: {id: 3, name: "GOOD", text:  "Современная отделка"}
+    },
+    totalArea: {
+      UNKNOWN: {id:0, name: "UNKNOWN", text: ""},
+      LESS30: {id:1, name: "LESS30", text: "<30"},
+      FROM30TO50: {id:2, name: "FROM30TO50", text: "30-50"},
+      FROM50TO65: {id:3, name: "FROM50TO65", text: "50-65"},
+      FROM65TO90: {id:4, name: "FROM65TO90", text: "65-90"},
+      FROM90TO120: {id:5, name: "FROM90TO120", text: "90-120"},
+      MORE120: {id:6, name: "MORE120", text: ">120"}
+    },
+    kitchenArea: {
+      UNKNOWN: {id:0, name: "UNKNOWN", text: ""},
+      LESS7: {id:1, name: "LESS7", text: "<7"},
+      FROM7TO10: {id:2, name: "FROM7TO10", text: "7-10"},
+      FROM10TO15: {id:3, name: "FROM10TO15", text: "10-15"},
+      MORE15: {id:6, name: "MORE15", text: ">15"}
+    },
+    metroDistance: {
+      UNKNOWN: {id:0, defaultValue: -1, name: "UNKNOWN", text: ""},
+      LESS5: {id:1, defaultValue: 5, name: "LESS7", text: "<5"},
+      FROM5TO10: {id:2, defaultValue: 10, name: "FROM5TO10", text: "5-10"},
+      FROM10TO15: {id:3, defaultValue: 15, name: "FROM10TO15", text: "10-15"},
+      FROM15TO30: {id:4, defaultValue: 30, name: "FROM15TO30", text: "15-30"},
+      FROM30TO60: {id:5, defaultValue: 60, name: "FROM30TO60", text: "30-60"},
+      FROM60TO90: {id:6, defaultValue: 90, name: "FROM60TO90", text: "60-90"}
+    },
+    coefficientType: {
+      FLOOR: {id:1, text: "Корректировка на этаж", getClassVal: function (name) {
+        return AnalyticsConst.floor[name].text;
+      }},
+      TOTAL_SQUARE: {id:2, text: "Корректировка на площадь", getClassVal: function (name) {
+          return AnalyticsConst.totalArea[name].text;
+        }},
+      BALCON: {id:3, text: "Корректировка на балкон", getClassVal: function (name) {
+          return AnalyticsConst.balcon[name].text;
+        }},
+      REPAIR_TYPE: {id:4, text: "Корректировка на состояние", getClassVal: function (name) {
+          return AnalyticsConst.repairType[name].text;
+        }},
+      KITCHEN_SQUARE: {id:5, text: "Корректировка на пл. кухни", getClassVal: function (name) {
+          return AnalyticsConst.kitchenArea[name].text;
+        }},
+      METRO_DISTANCE: {id:6, text: "Корректировка на дистанцию до метро", getClassVal: function (name) {
+          return AnalyticsConst.metroDistance[name].text;
+        }},
+      TRADE: {id:7, text: "Корректировка на торг", getClassVal: function (name) {
+          return "";
+        }},
     }
   };
 

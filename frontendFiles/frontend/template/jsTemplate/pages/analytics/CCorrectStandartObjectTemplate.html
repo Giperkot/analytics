@@ -4,15 +4,18 @@
 
     <%for (let i = 0; i < data.stObjectList.length; i++) {
         let stObject = data.stObjectList[i];
+        let analogList = data.stObjectList[i].analogList;
     %>
     <div class="standart_object_info">
-        <div class="address"><h2><%=stObject.standartObj.address%></h2></div>
+        <div class="address">
+            <h3><%=stObject.standartObj.address%></h3>
+        </div>
 
         <div class="flex_row">
-            <span><%=stObject.standartObj.roomsCount%></span>
-            <span>Кол. этажей: <%=stObject.standartObj.houseFloorsCount%> </span>
-            <span><%=stObject.standartObj.wallMaterial%></span>
-            <span><%=stObject.standartObj.realtySegment%></span>
+            <span class="row_text"><%=AnalyticsConst.roomsCount[stObject.standartObj.roomsCount].title%></span>
+            <span class="row_text">Кол. этажей: <%=stObject.standartObj.houseFloorsCount%> </span>
+            <span class="row_text"><%=AnalyticsConst.simpleHouseType[stObject.standartObj.wallMaterial].text%></span>
+            <span class="row_text"><%=AnalyticsConst.realtySegment[stObject.standartObj.realtySegment].text%></span>
         </div>
 
         <div class="flex_row">
@@ -22,7 +25,7 @@
             </div>
             <div class="option_wrapper">
                 <div class="option_header">Площадь кухни</div>
-                <div class="option_value"><%=stObject.standartObj.totalArea%> м<sup>2</sup></div>
+                <div class="option_value"><%=stObject.standartObj.kitchenArea%> м<sup>2</sup></div>
             </div>
             <div class="option_wrapper">
                 <div class="option_header">До метро</div>
@@ -34,11 +37,11 @@
             </div>
             <div class="option_wrapper">
                 <div class="option_header">Балкон / Лоджия</div>
-                <div class="option_value"><%=stObject.standartObj.balcon%></div>
+                <div class="option_value"><%=AnalyticsConst.balcon[stObject.standartObj.balcon].text%></div>
             </div>
             <div class="option_wrapper">
                 <div class="option_header">Ремонт</div>
-                <div class="option_value"><%=stObject.standartObj.realtySegment%></div>
+                <div class="option_value"><%=AnalyticsConst.realtySegment[stObject.standartObj.realtySegment].text%></div>
             </div>
         </div>
         <div class="flex_row">
@@ -51,7 +54,73 @@
                 <div class="option_value final_price_by_meter"></div>
             </div>
         </div>
+
+        <div class="analog_list">
+            <h4>Подобранные аналоги</h4>
+
+            <%for (let j = 0; j < analogList.length; j++) {
+            let analog = analogList[j].object;
+            let adjustCoeffsMap = analogList[j].adjustCoeffsMap;
+            %>
+
+            <div class="table_selector__standart_style form_wrapper__row">
+                <div class="form_wrapper__label"></div>
+                <div class="flex_row"></div>
+                <table class="analog_realty_table">
+                    <tbody>
+                    <tr class="header_row">
+                        <th class="">Адрес</th>
+                        <th class="">Цена</th>
+                        <th class="">Площадь</th>
+                        <th class="">Кухня</th>
+                        <th class="">До метро</th>
+                        <th class="">Ремонт</th>
+                        <th class="">Этаж</th>
+                        <th class="">Балкон/Лоджия</th>
+                    </tr>
+                    <tr data-id="">
+                        <td><%=analog.address%></td>
+                        <td></td>
+                        <td><%=analog.totalArea%></td>
+                        <td><%=analog.kitchenArea%></td>
+                        <td><%=analog.metroDistance%></td>
+                        <td><%=AnalyticsConst.repairType[analog.repairType].text%></td>
+                        <td><%=analog.floor%></td>
+                        <td><%=AnalyticsConst.balcon[analog.balcon].text%></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div class="correct_coeffs">
+                    <h5><b>Коэффициенты корректировки</b></h5>
+
+                    <%for (let key in adjustCoeffsMap) {
+                        let type = AnalyticsConst.coefficientType[adjustCoeffsMap[key].type];
+                    %>
+                        <div class="space_between">
+                            <span class="row_text"><%=type.text%></span>
+                            <span class="row_text"><%=type.getClassVal(adjustCoeffsMap[key].fromParametr)%></span>
+                            <span class="row_text"><%=type.getClassVal(adjustCoeffsMap[key].toParameter)%></span>
+                            <span class="row_text"><%=adjustCoeffsMap[key].value%></span>
+                            <div>
+                                <div class="form_wrapper__input">
+                                    <input class="standart_input" tabindex="1"
+                                           value="<%=adjustCoeffsMap[key].value%>" type="text" placeholder=""
+                                    />
+                                    <label class="input_wrapper_alert hidden"></label>
+                                </div>
+                            </div>
+                        </div>
+                    <%}%>
+                </div>
+            <%}%>
+
+            </div>
+
+        </div>
     </div>
     <%}%>
-
+    <div class="continue_wrapper">
+        <div class="to_result_btn"></div>
+    </div>
 </script>
