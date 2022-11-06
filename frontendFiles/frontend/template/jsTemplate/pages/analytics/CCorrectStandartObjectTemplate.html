@@ -1,0 +1,57 @@
+<script id="CCorrectStandartObjectTemplate" type="text/template">
+
+    <h1>Скорректируйте цены эталонных объектов</h1>
+
+    <%for (let i = 0; i < data.stObjectList.length; i++) {
+        let stObject = data.stObjectList[i];
+    %>
+    <div class="standart_object_info">
+        <div class="address"><%=stObject.standartObj.address%></div>
+
+        <div class="flex_row">
+            <span><%=stObject.standartObj.roomsCount%></span>
+            <span>Кол. этажей: <%=stObject.standartObj.houseFloorsCount%> </span>
+            <span><%=stObject.standartObj.wallMaterial%></span>
+            <span><%=stObject.standartObj.realtySegment%></span>
+        </div>
+
+        <div class="flex_row">
+            <div class="option_wrapper">
+                <div class="option_header">Площадь квартиры</div>
+                <div class="option_value"><%=stObject.standartObj.totalArea%> м<sup>2</sup></div>
+            </div>
+            <div class="option_wrapper">
+                <div class="option_header">Площадь кухни</div>
+                <div class="option_value"><%=stObject.standartObj.totalArea%> м<sup>2</sup></div>
+            </div>
+            <div class="option_wrapper">
+                <div class="option_header">До метро</div>
+                <div class="option_value"><%=stObject.standartObj.metroDistance%> мин.</div>
+            </div>
+            <div class="option_wrapper">
+                <div class="option_header">Этаж</div>
+                <div class="option_value"><%=stObject.standartObj.floor%> / <%=stObject.standartObj.houseFloorsCount%></div>
+            </div>
+            <div class="option_wrapper">
+                <div class="option_header">Балкон / Лоджия</div>
+                <div class="option_value"><%=stObject.standartObj.balcon%></div>
+            </div>
+            <div class="option_wrapper">
+                <div class="option_header">Ремонт</div>
+                <div class="option_value"><%=stObject.standartObj.realtySegment%></div>
+            </div>
+        </div>
+        <div class="flex_row">
+            <div class="option_wrapper">
+                <div class="option_header">Расчитанная цена</div>
+                <div class="option_value final_price"></div>
+            </div>
+            <div class="option_wrapper">
+                <div class="option_header"></div>
+                <div class="option_value final_price_by_meter"></div>
+            </div>
+        </div>
+    </div>
+    <%}%>
+
+</script>

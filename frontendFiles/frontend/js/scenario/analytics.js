@@ -462,7 +462,6 @@
                     requestId: importPage.temp.requestId,
                     standardRecords: idArr
                   }
-                  console.log(JSON.stringify(data));
 
                   //todo Тут бы ещё loader поставить...
                   helper.getHttpPromise({
@@ -472,10 +471,26 @@
                   }).then(function (response) {
                     var ans = JSON.parse(response);
 
-                    console.log(ans);
+                    // Спрятать таблицу с эталонами.
+                    let continueRow = fileUploader.parent.containerElm.querySelector(".continue_row");
+                    continueRow.classList.add("hidden");
+
+                    // Отобразить страницу с подбором эталонных объектов.
+                    let showingStandartObjectResult = self.parent.findByName("showingStandartObjectResult");
+                    // showingStandartObjectResult.properties.hidden = false;
+                    showingStandartObjectResult.model.stObjectList = ans;
+
+                    showingStandartObjectResult.show(true);
                   });
 
                 }
+              }
+            }, {
+              name: "showingStandartObjectResult",
+              type: "CCorrectStandartObject",
+              container: ".showing_standart_object_result",
+              properties: {
+                hidden: true
               }
             }
           ]
