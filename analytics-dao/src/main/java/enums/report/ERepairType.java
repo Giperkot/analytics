@@ -67,10 +67,19 @@ public enum ERepairType implements ITitled {
             }
         }
 
-        throw new IllegalArgumentException("Значение не найдено " + value);
+        throw new IllegalArgumentException("Значение столбца Состояние (" + value + ") не найдено. " +
+                "Ожидается одно из значений: " + getTitlesEnum());
     }
 
     public static ERepairType[] getValues() {
         return values;
+    }
+
+    public static String getTitlesEnum() {
+        String titles = "";
+        for(ERepairType value: getValues()) {
+            titles += value.getTitle() + ", ";
+        }
+        return titles.substring(0, titles.length() - 2);
     }
 }

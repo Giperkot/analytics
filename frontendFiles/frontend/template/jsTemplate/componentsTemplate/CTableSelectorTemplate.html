@@ -24,10 +24,16 @@
 
     <table>
         <tr class="header_row">
-            <%for (let i = 0; i < data.columns.length; i++) {%>
-                <th  class="<%=(data.columns[i].className) ? data.columns[i].className : ''%>">
-                    <%=data.columns[i].label%>
-                </th>
+            <%for (let i = 0; i < data.columns.length + 1; i++) {%>
+                <%if (i == 0) {%>
+                    <th  class="<%=''%>">
+                        <%=''%>
+                    </th>
+                <%} else {%>
+                    <th  class="<%=(data.columns[i-1].className) ? data.columns[i-1].className : ''%>">
+                        <%=data.columns[i-1].label%>
+                    </th>
+                <%}%>
             <%}%>
         </tr>
 
@@ -35,14 +41,18 @@
             let row = data.gridData[j];
         %>
             <tr data-id="<%=data.gridData[j][data.idField]%>" <%=(row.className) ? 'class="' + row.className + '"' : ''%>>
-                <%for (let i = 0; i < data.columns.length; i++) {%>
+                <%for (let i = 0; i < data.columns.length + 1; i++) {%>
                 <td>
-                    <%if (data.columns[i].name === "ord") {
-                        row.ord = j;
-                    %>
-                        <%=j + 1%>
+                    <%if (i == 0) {%>
+                        <input type="checkbox" class="checkbox"/>
                     <%} else {%>
-                        <%=row[data.columns[i].name]%>
+                        <%if (data.columns[i-1].name === "ord") {
+                            row.ord = j;
+                        %>
+                            <%=j + 1%>
+                        <%} else {%>
+                            <%=row[data.columns[i-1].name]%>
+                        <%}%>
                     <%}%>
                 </td>
                 <%}%>

@@ -6,7 +6,7 @@ import interfaces.report.ITitled;
 @EnumMethodDataBase(fromDbName = "fromString")
 public enum ESimpleHouseType implements ITitled {
     UNKNOWN(0, "UNKNOWN", "Неизвестно"),
-    BRICK(1, "BRICK", "Кирпичн"),
+    BRICK(1, "BRICK", "Кирпич"),
     MONOLIT(2, "MONOLIT", "Монолит"),
     PANEL(3, "PANEL", "Панель");
 
@@ -67,11 +67,19 @@ public enum ESimpleHouseType implements ITitled {
             }
         }
 
-        throw new IllegalArgumentException("Значение не найдено " + value);
+        throw new IllegalArgumentException("Значение столбца Материал стен (" + value + ") не найдено. " +
+                "Ожидается одно из значений: " + getTitlesEnum());
     }
 
     public static ESimpleHouseType[] getValues() {
         return values;
     }
 
+    public static String getTitlesEnum() {
+        String titles = "";
+        for(ESimpleHouseType value: getValues()) {
+            titles += value.getTitle() + ", ";
+        }
+        return titles.substring(0, titles.length() - 2);
+    }
 }
