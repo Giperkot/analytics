@@ -6,7 +6,7 @@ public class ImportResponseDto {
 
     private long requestId;
 
-    private List<ImportExcelRealtyDto> importExcelRealtyDtoList;
+    private List<ShowImportExcelRealtyDto> importExcelRealtyDtoList;
 
     private String exception;
 
@@ -18,11 +18,11 @@ public class ImportResponseDto {
         this.requestId = requestId;
     }
 
-    public List<ImportExcelRealtyDto> getImportExcelRealtyDtoList() {
+    public List<ShowImportExcelRealtyDto> getImportExcelRealtyDtoList() {
         return importExcelRealtyDtoList;
     }
 
-    public void setImportExcelRealtyDtoList(List<ImportExcelRealtyDto> importExcelRealtyDtoList) {
+    public void setImportExcelRealtyDtoList(List<ShowImportExcelRealtyDto> importExcelRealtyDtoList) {
         this.importExcelRealtyDtoList = importExcelRealtyDtoList;
     }
 

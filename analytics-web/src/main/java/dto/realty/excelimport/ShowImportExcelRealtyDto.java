@@ -11,7 +11,7 @@ public class ShowImportExcelRealtyDto {
 
     private String address;
 
-    private int roomsCount;
+    private String roomsCount;
 
     private String realtySegment;
 
@@ -47,11 +47,11 @@ public class ShowImportExcelRealtyDto {
         this.address = address;
     }
 
-    public int getRoomsCount() {
+    public String getRoomsCount() {
         return roomsCount;
     }
 
-    public void setRoomsCount(int roomsCount) {
+    public void setRoomsCount(String roomsCount) {
         this.roomsCount = roomsCount;
     }
 
