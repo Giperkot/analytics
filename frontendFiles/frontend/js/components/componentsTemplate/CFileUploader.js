@@ -108,6 +108,9 @@
                 this.temp.fileMap[files[0].name] =  files[0];
 
                 this.refreshFileList();
+                if (this.events.onLoadFile) {
+                    this.events.onLoadFile();
+                }
             },
 
             dragenter: function (evt) {

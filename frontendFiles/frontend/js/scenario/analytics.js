@@ -4,9 +4,38 @@
 (function () {
   document.addEventListener("DOMContentLoaded", function() {
     window.onpopstate = function(event) {
-      debugger;
       lkPage.loadPageByUrl();
     };
+
+    var popupForm = cmpCore.addElement({
+      name: "standartPopup",
+      type: "CStandartPupupForm",
+      container: ".article_popup",
+      properties: {
+        isSuccess: false
+      },
+      methods: {
+        /*showConfirm: function(config) {
+          this.setActiveComponent("confirmWindow");
+          let confirmWindow = this.findByName("confirmWindow");
+          confirmWindow.setOkCallback(config.callback);
+
+          let articlePopup = this.containerElm.closest(".article_popup");
+          articlePopup.className = "article_popup article_popup__small";
+          // articlePopup.classList.add("article_popup__small");
+
+          this.showForm(true);
+        }*/
+      },
+      /*children: [{
+          name: "confirmWindow",
+          type: "CConfirm",
+          container: ".form_wrapper",
+          properties: {
+            hidden: true
+          }
+        }]*/
+    });
 
     let lkPage = cmpCore.addElement({
       name: "pageSwitcher",
@@ -367,7 +396,8 @@
                   }).then(function (response) {
                     var ans = JSON.parse(response);
 
-                    fileUploader.hide();
+                    let uploadXlsFile = fileUploader.parent.containerElm.querySelector(".upload_xls_file");
+                    uploadXlsFile.classList.add("hidden");
 
                     let resultTable = cmpCore.findByName("resultTable");
                     let importPage = cmpCore.findByName("import");
@@ -379,6 +409,10 @@
                     continueRow.classList.remove("hidden");
 
                     importPage.temp.requestId = ans.requestId;
+                  }, function (response) {
+                    let ans = JSON.parse(response);
+                    popupForm.showForm(true);
+                    popupForm.showResult(ans.message, "small");
                   });
 
                 }
@@ -432,6 +466,26 @@
                   add: false,
                   edit: false,
                   delete: false
+                }
+              },
+              methods: {
+                getSelectedFilesMessage: function (x, y) {
+                  if ((x % 100 == 11) || (x % 100 == 12) || (x % 100 == 13) || (x % 100 == 14)) {
+                    return("Выбрано " + x + " квартир из " + y)
+                  } else if ((x % 10 == 2) ||  (x % 10 == 3) || (x % 10 == 4)) {
+                    return("Выбрано " + x + " квартиры из " + y)
+                  } else { if (x % 10 == 1) {
+                    return("Выбрано " + x + " квартира из " + y)
+                  } else
+                    return("Выбрано " + x + " квартир из " + y)
+                  }
+                }
+              },
+              events: {
+                onSelect: function (records) {
+                  let selectedCount = lkPage.containerElm.querySelector(".selected_count");
+
+                  selectedCount.innerHTML = this.getSelectedFilesMessage(records.length, this.model.gridData.length);
                 }
               }
             }, {

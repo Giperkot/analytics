@@ -187,8 +187,9 @@
                     this.handleSingleModeClick(tableLine);
                 }
 
-
-
+                if (this.events.onSelect) {
+                    this.events.onSelect.call(this, this.getValue());
+                }
             }
     }});
 })();

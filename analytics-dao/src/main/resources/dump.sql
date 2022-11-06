@@ -385,43 +385,6 @@ create table realty.house_add_info (
     house_type varchar(255) not null
 );
 
-create or replace view realty.v_notice_info_with_avg_price as(
-    select
-        n.id,
-        n.title,
-        n.sum,
-        pt.url,
-        h.street,
-        h.house_num,
-        h.coords,
-        d.name,
-        nc.square_value,
-        nap.sum as average_sum,
-        nc.rooms_count,
-        nc.floor,
-        nc.house_floor,
-        nc.house_type,
-        nc.house_build_year,
-        nc.balcon,
-        nc.classifier_category,
-        nc.realty_segment,
-        nc.repair_type,
-        nc.simple_house_type,
-        nc.total_square,
-        nc.kitchen_square,
-        nc.metro_distance,
-        d.id as district_id
-    from parser.notice n
-        join parser.parse_task pt on n.parse_task_id = pt.id
-        join realty.house h on n.house_id = h.id
-        left join realty.notice_category nc on n.id = nc.notice_id
-        left join realty.notice_average_price nap on nc.canon_type_number = nap.canon_type_number and nap.realty_config_type = 'COMPLEX'
-        left join realty.district d on h.district_id = d.id
-    where
-        n.status = 'ACTIVE'
-    order by h.district_id
-);
-
 create table realty.fias_addr(
     id bigserial PRIMARY KEY NOT NULL,
     fias_uuid uuid not null,
@@ -511,3 +474,40 @@ alter table realty.adjust_coeffs
 
 alter table realty.adjust_coeffs
     add column absolute boolean not null default false;
+
+create or replace view realty.v_notice_info_with_avg_price as(
+    select
+        n.id,
+        n.title,
+        n.sum,
+        pt.url,
+        h.street,
+        h.house_num,
+        h.coords,
+        d.name,
+        nc.square_value,
+        nap.sum as average_sum,
+        nc.rooms_count,
+        nc.floor,
+        nc.house_floor,
+        nc.house_type,
+        nc.house_build_year,
+        nc.balcon,
+        nc.classifier_category,
+        nc.realty_segment,
+        nc.repair_type,
+        nc.simple_house_type,
+        nc.total_square,
+        nc.kitchen_square,
+        nc.metro_distance,
+        d.id as district_id
+    from parser.notice n
+        join parser.parse_task pt on n.parse_task_id = pt.id
+        join realty.house h on n.house_id = h.id
+        left join realty.notice_category nc on n.id = nc.notice_id
+        left join realty.notice_average_price nap on nc.canon_type_number = nap.canon_type_number and nap.realty_config_type = 'COMPLEX'
+        left join realty.district d on h.district_id = d.id
+    where
+        n.status = 'ACTIVE'
+    order by h.district_id
+);
