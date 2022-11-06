@@ -110,4 +110,13 @@ public enum ERoomsCount implements ITitled {
     public String getName() {
         return name;
     }
+
+    public static ERoomsCount getByTitle(String value, int lineNumber) {
+        try {
+            return getByRoomsCount(value);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Значение столбца Количество комнат в строке " + lineNumber
+                    + " (" + value + ") не найдено. " + "Ожидается численное значение, \"Свободная планировка\" или \"Студия\"");
+        }
+    }
 }

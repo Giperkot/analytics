@@ -57,6 +57,15 @@ public enum EBalconParam implements ITitled {
                 "Ожидается одно из значений: " + getTitlesEnum());
     }
 
+    public static EBalconParam getByTitle(String value, int lineNumber) {
+        try {
+            return getByTitle(value);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Значение столбца Балкон в строке " + lineNumber
+                    + " (" + value + ") не найдено. " + "Ожидается одно из значений: " + getTitlesEnum());
+        }
+    }
+
     public int getId() {
         return id;
     }

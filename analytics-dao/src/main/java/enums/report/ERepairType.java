@@ -71,6 +71,15 @@ public enum ERepairType implements ITitled {
                 "Ожидается одно из значений: " + getTitlesEnum());
     }
 
+    public static ERepairType getByTitle(String value, int lineNumber) {
+        try {
+            return getByTitle(value);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Значение столбца Состояние в строке " + lineNumber
+                    + " (" + value + ") не найдено. " + "Ожидается одно из значений: " + getTitlesEnum());
+        }
+    }
+
     public static ERepairType[] getValues() {
         return values;
     }

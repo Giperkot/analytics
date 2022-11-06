@@ -71,6 +71,15 @@ public enum ESimpleHouseType implements ITitled {
                 "Ожидается одно из значений: " + getTitlesEnum());
     }
 
+    public static ESimpleHouseType getByTitle(String value, int lineNumber) {
+        try {
+            return getByTitle(value);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Значение столбца Материал стен в строке " + lineNumber
+                    + " (" + value + ") не найдено. " + "Ожидается одно из значений: " + getTitlesEnum());
+        }
+    }
+
     public static ESimpleHouseType[] getValues() {
         return values;
     }

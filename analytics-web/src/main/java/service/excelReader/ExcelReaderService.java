@@ -9,10 +9,7 @@ import db.entity.realty.excelimport.ImportRealtyRequestEntity;
 import dto.realty.excelimport.ImportExcelRealtyDto;
 import dto.realty.excelimport.ImportResponseDto;
 import dto.realty.excelimport.ShowImportExcelRealtyDto;
-import enums.report.EBalconParam;
-import enums.report.ERealtySegment;
-import enums.report.ERepairType;
-import enums.report.ESimpleHouseType;
+import enums.report.*;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.CellType;
@@ -115,81 +112,91 @@ public class ExcelReaderService {
                 if (row.getCell(0).getCellType() == CellType.STRING) {
                     String location = row.getCell(0).getStringCellValue();
                     if (location.replaceAll("\\s", "").length() == 0) {
-                        throw new IllegalArgumentException("В строке " + i + " ячейка Местоположение пустая");
+                        throw new IllegalArgumentException("В строке " + (i+1) + " столбца Местоположение найдена пустая ячейка");
                     }
                     excelRealtyDto.setAddress(location);
                     excelRealtyDtoToShow.setAddress(location);
                 }
+
                 if (row.getCell(1).getCellType() == CellType.NUMERIC) {
                     int rooms = (int) row.getCell(1).getNumericCellValue();
+                    ERoomsCount.getByTitle(String.valueOf(rooms), i+1);
                     excelRealtyDto.setRoomsCount(String.valueOf(rooms));
                     excelRealtyDtoToShow.setRoomsCount(String.valueOf(rooms));
                 } else if (row.getCell(1).getCellType() == CellType.STRING) {
                     String rooms = row.getCell(1).getStringCellValue();
+                    ERoomsCount.getByTitle(rooms, i+1);
                     excelRealtyDto.setRoomsCount(rooms);
                     excelRealtyDtoToShow.setRoomsCount(rooms);
-                } else {    //Это исключение заменить на другое, для енама
-                    throw new IllegalArgumentException("Во втором столбце (Количество комнат) ожидается числовое значение");
                 }
+
                 if (row.getCell(2).getCellType() == CellType.STRING) {
                     String buildingType = row.getCell(2).getStringCellValue();
-                    excelRealtyDto.setRealtySegment(ERealtySegment.getByTitle(buildingType));
+                    excelRealtyDto.setRealtySegment(ERealtySegment.getByTitle(buildingType, i+1));
                     excelRealtyDtoToShow.setRealtySegment(buildingType);
                 }
+
                 if (row.getCell(3).getCellType() == CellType.NUMERIC) {
                     int floorsInBuilding = (int) row.getCell(3).getNumericCellValue();
                     excelRealtyDto.setHouseFloorsCount(floorsInBuilding);
                     excelRealtyDtoToShow.setHouseFloorsCount(floorsInBuilding);
                 } else {
-                    throw new IllegalArgumentException("В четвертом столбце (Этажность дома) ожидается числовое значение");
+                    throw new IllegalArgumentException("В столбце Этажность дома в строке " + (i+1) + " ожидается числовое значение");
                 }
+
                 if (row.getCell(4).getCellType() == CellType.STRING) {
                     String wallsMaterial = row.getCell(4).getStringCellValue();
-                    excelRealtyDto.setWallMaterial(ESimpleHouseType.getByTitle(wallsMaterial));
+                    excelRealtyDto.setWallMaterial(ESimpleHouseType.getByTitle(wallsMaterial, i+1));
                     excelRealtyDtoToShow.setWallMaterial(wallsMaterial);
                 }
+
                 if (row.getCell(5).getCellType() == CellType.NUMERIC) {
                     int floor = (int) row.getCell(5).getNumericCellValue();
                     excelRealtyDto.setFloor(floor);
                     excelRealtyDtoToShow.setFloor(floor);
                 } else {
-                    throw new IllegalArgumentException("В шестом столбце (Этаж расположения) ожидается числовое значение");
+                    throw new IllegalArgumentException("В столбце Этаж расположения в строке " + (i+1) + " ожидается числовое значение");
                 }
+
                 if (row.getCell(6).getCellType() == CellType.NUMERIC) {
                     double apartmentArea = row.getCell(6).getNumericCellValue();
                     excelRealtyDto.setTotalArea(apartmentArea);
                     excelRealtyDtoToShow.setTotalArea(apartmentArea);
                 } else {
-                    throw new IllegalArgumentException("В седьмом столбце (Площадь квартиры) ожидается числовое значение");
+                    throw new IllegalArgumentException("В столбце Площадь квартиры в строке " + (i+1) + " ожидается числовое значение");
                 }
+
                 if (row.getCell(7).getCellType() == CellType.NUMERIC) {
                     double kitchenArea = row.getCell(7).getNumericCellValue();
                     excelRealtyDto.setKitchenArea(kitchenArea);
                     excelRealtyDtoToShow.setKitchenArea(kitchenArea);
                 } else {
-                    throw new IllegalArgumentException("В восьмом столбце (Площадь кухни) ожидается числовое значение");
+                    throw new IllegalArgumentException("В столбце Площадь кухни в строке " + (i+1) + " ожидается числовое значение");
                 }
+
                 if (row.getCell(8).getCellType() == CellType.STRING) {
                     String balcony = row.getCell(8).getStringCellValue();
-                    excelRealtyDto.setBalcon(EBalconParam.getByTitle(balcony));
+                    excelRealtyDto.setBalcon(EBalconParam.getByTitle(balcony, i+1));
                     excelRealtyDtoToShow.setBalcon(balcony);
                 }
+
                 if (row.getCell(9).getCellType() == CellType.NUMERIC) {
                     int distanceToMetro = (int) row.getCell(9).getNumericCellValue();
                     excelRealtyDto.setMetroDistance(distanceToMetro);
                     excelRealtyDtoToShow.setMetroDistance(distanceToMetro);
                 } else {
-                    throw new IllegalArgumentException("В десятом столбце (Удаленность от станции метро) ожидается числовое значение");
+                    throw new IllegalArgumentException("В столбце Удаленность от станции метро в строке " + (i+1) + " ожидается числовое значение");
                 }
+
                 if (row.getCell(10).getCellType() == CellType.STRING) {
                     String condition = row.getCell(10).getStringCellValue();
-                    excelRealtyDto.setRepairType(ERepairType.getByTitle(condition));
+                    excelRealtyDto.setRepairType(ERepairType.getByTitle(condition, i+1));
                     excelRealtyDtoToShow.setRepairType(condition);
                 }
             } catch (IllegalArgumentException e) {
                 throw e;
             } catch (NullPointerException e) {
-                throw new RuntimeException("В импортируемых данных найдена незаполненная ячейка", e);
+                throw new RuntimeException("В строке " + (i+1) + " найдена пустая ячейка");
             }
 
             realtyObjectEntityList.add(importMapper.toImportRealtyObjectEntity(excelRealtyDto));
